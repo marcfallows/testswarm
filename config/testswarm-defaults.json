@@ -1,6 +1,7 @@
 {
 	"general": {
-		"timezone": "UTC"
+		"timezone": "UTC",
+		"ciUsername": "hudson"
 	},
 	"database": {
 		"host": "localhost",

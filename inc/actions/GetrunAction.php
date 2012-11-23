@@ -45,17 +45,37 @@ class GetrunAction extends Action {
 		// Get oldest run for this user agent. But not runs that are already being run
 		// (status=1), or reached the max or passed (status=2).
 		$runID = $db->getOne(str_queryf(
-			'SELECT
-				run_id
-			FROM
-				run_useragent
+			'SELECT	run_useragent.run_id
+			FROM	jobs 		
+				INNER JOIN runs ON jobs.id = runs.job_id
+				INNER JOIN run_useragent  ON runs.id = run_useragent.run_id
+				LEFT OUTER JOIN (
+							/* This gives us a list of users who have run jobs and when they last updated a run */
+							SELECT	jobs.user_id, 
+									MAX(run_useragent.updated) AS MaxUpdated, 
+									CASE users.name
+									WHEN %s THEN 2
+									ELSE 1
+									END AS Priority
+							FROM	users
+									INNER JOIN jobs  ON users.id = jobs.user_id
+									INNER JOIN runs ON jobs.id = runs.job_id
+									INNER JOIN run_useragent ON runs.id = run_useragent.run_id
+					WHERE useragent_id = %s
+							GROUP BY jobs.user_id
+							) nextUser ON nextUser.user_id = jobs.user_id		
 			WHERE useragent_id = %s
-			AND   status = 0
-			ORDER BY run_id DESC
+			AND run_useragent.status = 0
+			ORDER BY	nextUser.Priority,
+						nextUser.MaxUpdated, 
+						nextUser.user_id, 
+						run_useragent.run_id DESC
 			LIMIT 1;',
+			$conf->general->ciUsername,
+			$browserInfo->getSwarmUaID(),
 			$browserInfo->getSwarmUaID()
 		));
-
+		
 		$runInfo = false;
 
 		// A run was found for the current user_agent
