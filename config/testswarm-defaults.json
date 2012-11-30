@@ -115,6 +115,9 @@
 			"Toshiba 2011",
 			"Toshiba 2012",
 			"Google TV"
+		],
+		"PhantomJS": [
+			"PhantomJS|1|7.0"
 		]
 	},
 	"debug": {
