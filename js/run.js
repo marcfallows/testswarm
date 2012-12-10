@@ -256,7 +256,12 @@
 	}
 	
 	function setupTestTimeout( runInfo ) {
-		timeoutCheckCountdown( runInfo, SWARM.conf.client.runTimeout );
+		// 1 second long looping disabled due to a bug on MStar ( TV is going very slow when dom is updated once a second )
+		//timeoutCheckCountdown( runInfo, SWARM.conf.client.runTimeout );
+		
+		testTimeout = setTimeout( function () {
+			timeoutCheck( runInfo );
+		}, SWARM.conf.client.runTimeout );
 	}
 
 	function hideTimeoutTimer() {
@@ -268,6 +273,7 @@
 		$( '#timeoutTimer' ).show();
 	}
 	
+	// TODO: debug why this code is causing MStar to run very slow
 	function timeoutCheckCountdown( runInfo, secondsLeft ) {
 		logTimeoutCountdown( secondsLeft );
 		
