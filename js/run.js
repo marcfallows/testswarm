@@ -318,7 +318,7 @@
 
 				iframe = document.createElement( 'iframe' );
 				iframe.width = '99%';
-				iframe.height = 600;
+				iframe.height = 300;
 				iframe.className = 'test-runner-frame';
 				iframe.src = currRunUrl + (currRunUrl.indexOf( '?' ) > -1 ? '&' : '?') + $.param({
 					// Cache buster

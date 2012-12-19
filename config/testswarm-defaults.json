@@ -1,6 +1,7 @@
 {
 	"general": {
-		"timezone": "UTC"
+		"timezone": "UTC",
+		"ciUsername": "hudson"
 	},
 	"database": {
 		"host": "localhost",
@@ -40,7 +41,6 @@
 			"Technika MStar",
 			"Technika Avtrex",
 			"Samsung 2012",
-			"Toshiba 2011",
 			"Toshiba 2012",
             "LG NetCast 2011",
             "LG NetCast 2012"
@@ -115,6 +115,9 @@
 			"Toshiba 2011",
 			"Toshiba 2012",
 			"Google TV"
+		],
+		"PhantomJS": [
+			"PhantomJS|1|7.0"
 		]
 	},
 	"debug": {
