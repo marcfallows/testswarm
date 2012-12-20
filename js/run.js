@@ -215,7 +215,6 @@
 				log('run.js: timeoutCheck(): true');
 				testTimedout( runInfo );
 			} else {
-				log('run.js: timeoutCheck(): false');
 				setupTestTimeout( runInfo );
 			}		
 		});
