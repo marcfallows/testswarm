@@ -68,7 +68,33 @@ class RunnerAction extends Action {
 					$total,
 					swarmdb_dateformat( $expected_update ),
 					swarmdb_dateformat( $now ),
+					
 					$resultsId
+				));
+				
+				if ( $db->getAffectedRows() !== 1 ) {
+					$this->setError( 'internal-error', 'Updating of results table failed.' );
+					return;
+				}
+
+				$runId = $db->getOne(str_queryf(
+					"SELECT run_id
+					FROM runresults
+					WHERE id = %u;",
+					$resultsId
+				));
+				
+				$db->query(str_queryf(
+					"UPDATE run_useragent
+					SET
+						updated = %s
+					WHERE results_id = %u
+					AND run_id = %u
+					AND status = 1;",
+					swarmdb_dateformat( $now ),
+					
+					$resultsId,
+					$runId
 				));
 				
 				$result = "ok";
