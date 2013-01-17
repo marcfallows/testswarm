@@ -178,9 +178,9 @@
 	
 	function notifyServerAboutStepStart() {
 		var params = {
-			fail: angular.testSwarmResults.fail,
-			error: angular.testSwarmResults.error,
-			total: angular.testSwarmResults.total,
+			fail: window.TestSwarm.result.fail,
+			error: window.TestSwarm.result.error,
+			total: window.TestSwarm.result.total,
 			beatRate: beatRate,
 			action: 'runner',
 			type: 'stepStart'
@@ -536,20 +536,26 @@
 			install: function () {
 				log( 'Installing QUnit support...' );
 				
+				var moduleCount = 0, 
+					logCount = 0;
+		
+				window.TestSwarm.result = {
+					fail: 0,
+					error: 0,
+					total: 0
+				};	
+					
 				QUnit.done = function ( results ) {
-					submit(window.TestSwarm.result = {
-						fail: results.failed,
-						error: 0,
-						total: results.total
-					});
+					window.TestSwarm.result.fail = results.failed;
+					window.TestSwarm.result.total = results.total;
+					submit(window.TestSwarm.result);
 				};
-
-				var moduleCount = 0, testCount = 0, logCount = 0;
 				
 				QUnit.testStart = function( name ) {
-					testCount++;
+					window.TestSwarm.result.total++;
 					logCount = 0;
-					var msg = 'QUnit: testStart ' + testCount + ': ' + name.name;
+					var msg = 'QUnit: testStart ' + window.TestSwarm.result.total + ': ' + name.name;
+					notifyServerAboutStepStart();
 					QUnit.heartbeat( {
 						message: msg,
 						cssClass: 'test'
