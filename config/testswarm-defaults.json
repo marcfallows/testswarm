@@ -29,7 +29,7 @@
 		"saveRetrySleep": 5,
 		"requireRunToken": false,
 		"refreshControl": 0,
-		"expectedUpdateTimeoutMargin": 10
+		"expectedUpdateTimeoutMargin": 20
 	},
 	"storage": {
 		"cacheDir": "$1/cache"
