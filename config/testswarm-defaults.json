@@ -36,7 +36,7 @@
 	},
 	"browserSets": {
 		"default": [
-			"Chrome|25",
+			"Chrome|26",
 			"Philips 2012 High",
 			"Technika MStar",
 			"Technika Avtrex",
@@ -46,7 +46,7 @@
             "LG NetCast 2012"
 		],
 		"all devices": [
-			"Chrome|25",
+			"Chrome|26",
 			"Technika MStar",
 			"Technika Avtrex",
 			"Philips 2011",
@@ -64,14 +64,14 @@
 			"Google TV"
 		],
 		"currentDesktop": [
-			"Chrome|25",
+			"Chrome|26",
 			"Firefox|12",
 			"IE|9",
 			"Opera|11|60",
 			"Safari|5|1"
 		],
 		"allDesktop": [
-			"Chrome|25",
+			"Chrome|26",
 			"Firefox|11",
 			"Firefox|12",
 			"Firefox|13",
