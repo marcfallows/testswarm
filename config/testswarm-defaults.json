@@ -36,17 +36,18 @@
 	},
 	"browserSets": {
 		"default": [
-			"Chrome|25",
+			"Chrome|26",
 			"Philips 2012 High",
 			"Technika MStar",
 			"Technika Avtrex",
 			"Samsung 2012",
 			"Toshiba 2012",
             "LG NetCast 2011",
-            "LG NetCast 2012"
+            "LG NetCast 2012",
+            "LG NetCast 2013"
 		],
 		"all devices": [
-			"Chrome|25",
+			"Chrome|26",
 			"Technika MStar",
 			"Technika Avtrex",
 			"Philips 2011",
@@ -57,6 +58,7 @@
 			"Samsung 2012",
 			"LG NetCast 2011",
 			"LG NetCast 2012",
+			"LG NetCast 2013",
 			"Toshiba 2011 Regza",
 			"Toshiba 2011",
 			"Toshiba 2012",
@@ -64,14 +66,14 @@
 			"Google TV"
 		],
 		"currentDesktop": [
-			"Chrome|25",
+			"Chrome|26",
 			"Firefox|12",
 			"IE|9",
 			"Opera|11|60",
 			"Safari|5|1"
 		],
 		"allDesktop": [
-			"Chrome|25",
+			"Chrome|26",
 			"Firefox|11",
 			"Firefox|12",
 			"Firefox|13",
@@ -113,6 +115,7 @@
 			"Samsung 2012",
 			"LG NetCast 2011",
 			"LG NetCast 2012",
+			"LG NetCast 2013",
 			"Toshiba 2011 Regza",
 			"Toshiba 2011",
 			"Toshiba 2012",

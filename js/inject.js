@@ -551,10 +551,12 @@
 					submit(window.TestSwarm.result);
 				};
 				
-				QUnit.testStart = function( name ) {
+				QUnit.testStart = function( nameObj ) {
 					window.TestSwarm.result.total++;
 					logCount = 0;
-					var msg = 'QUnit: testStart ' + window.TestSwarm.result.total + ': ' + name.name;
+					var msg = 'QUnit: testStart ' + window.TestSwarm.result.total + ': ' + nameObj.name;
+					var timeoutMargin = 10;
+                    beatRate = !!nameObj && !!nameObj.config && !!nameObj.config.testTimeout ? (nameObj.config.testTimeout / 1000) + timeoutMargin : defaultBeatRate;
 					notifyServerAboutStepStart();
 					QUnit.heartbeat( {
 						message: msg,
