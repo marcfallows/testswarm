@@ -81,16 +81,21 @@
 
 		links = doc.getElementsByTagName( 'link' );
 		for ( i = 0; i < links.length; i += 1 ) {
-			href = links[i].href;
+			// links[i].href is returning full url in chrome even if href attribute is relative
+			//href = links[i].href;
+			// reading the href attribute returns href string is it's set on the element
+			href = links[i].attributes['href'].value;
+			
 			if ( href.indexOf( '/' ) === 0 ) {
 				href = root + href;
 			} else if ( !/^https?:\/\//.test( href ) ) {
 				href = cur + href;
 			}
             
-			//Opera Philips fix
-            if(links[i].href != href){
-			    links[i].href = href;
+			if(links[i].attributes['href'].value != href){
+				// if href was changed we need to put it back to DOM
+			    links[i].attributes['href'].value = href;				
+				//log('new href is ' + href);
             }
 		}
 
@@ -410,7 +415,16 @@
 				
 				window.TestSwarm.serialize = function () {
 					// take only the #wrapper and #html as a test result
-					remove('content');					
+					remove('content');	
+
+					// move logger to after jasmine reporter
+					var logger = document.getElementById('loggerWrapper');
+					var reporter = document.getElementsByClassName('jasmine_reporter')[0];
+					if(!!logger && !!reporter) {
+						logger.parentElement.removeChild(logger);
+						reporter.parentElement.appendChild(logger)
+					}					
+					
 					return trimSerialize();
 				};
 				
