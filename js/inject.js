@@ -221,6 +221,9 @@
 	function submit( params ) {
 		log('Submitting runner results...');	
 
+		notifyServerAboutStepStart();
+		window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out	
+		
 		var form, i, input, key;
 
 		if ( window.curHeartbeat ) {
@@ -408,8 +411,7 @@
 							delete spec.suite.duration;
 						}
 						
-						notifyServerAboutStepStart();						
-
+						notifyServerAboutStepStart();
 						window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out						
                     },
                     reportSpecResults: function (spec)
