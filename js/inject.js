@@ -398,7 +398,19 @@
                     {
                         log('Jasmine reportSpecStarting' + spec.description);
 						jasmineTestSwarmResults.total++;
-						window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out
+
+						// override beatRate with expected test duration.
+						// jasmine it function cannot take additional parameter with options
+						// duration can be set on the suite ( this.duration = 60 ) before it statement.
+						beatRate = spec.suite.duration || defaultBeatRate;
+						
+						if(!!spec.suite.duration) {
+							delete spec.suite.duration;
+						}
+						
+						notifyServerAboutStepStart();						
+
+						window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out						
                     },
                     reportSpecResults: function (spec)
                     {
