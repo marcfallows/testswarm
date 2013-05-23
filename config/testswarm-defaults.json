@@ -126,6 +126,9 @@
 		],
 		"PhantomJS": [
 			"PhantomJS|1|8.1"
+		],
+		"Chrome": [
+			"Chrome|26"
 		]
 	},
 	"debug": {
