@@ -243,6 +243,8 @@
 			log('Submitting results by building and submitting html form...');			
 		}
 		
+		log('Params=' + JSON.stringify(params));
+		
 		if ( !params.report_html ) {
 			params.report_html = window.TestSwarm.serialize();
 		}
@@ -257,7 +259,6 @@
 				window.parent.postMessage( query, '*' );
 				log('Message posted');
 			}
-
 		} else {
 			form = document.createElement( 'form' );
 			form.action = url;
@@ -378,30 +379,30 @@
 				var testSwarmReporter = {
                     reportRunnerStarting: function (runner)
                     {
-                        log('Jasmine reportRunnerStarting');
 						// reset counters
 						window.TestSwarm.result = jasmineTestSwarmResults = {
 							fail: 0,
 							error: 0,
 							total: 0
 						};
+                        log('Jasmine reportRunnerStarting: ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     },
                     reportRunnerResults: function (runner)
                     {
                         // testing finished
-						log('Jasmine reportRunnerResults');
+						log('Jasmine reportRunnerResults' + JSON.stringify(jasmineTestSwarmResults || {}));
 						submit(jasmineTestSwarmResults);						
                     },
                     reportSuiteResults: function (suite)
                     {
-                        log('Jasmine reportSuiteResults:' + suite.description);
+                        log('Jasmine reportSuiteResults: ' + suite.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
 						// not in use
                     },
                     reportSpecStarting: function (spec)
                     {
-                        log('Jasmine reportSpecStarting' + spec.description);
-						jasmineTestSwarmResults.total++;
-
+                        jasmineTestSwarmResults.total++;
+						log('Jasmine reportSpecStarting: ' + spec.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
+						
 						// override beatRate with expected test duration.
 						// jasmine it function cannot take additional parameter with options
 						// duration can be set on the suite ( this.duration = 60 ) before it statement.
@@ -416,14 +417,14 @@
                     },
                     reportSpecResults: function (spec)
                     {
-						log('Jasmine reportSpecResults: ' + spec.description);
-						
-                        if(spec.results().failedCount>0)
+						if(spec.results().failedCount>0) {
 							jasmineTestSwarmResults.fail++;
+						}
+						log('Jasmine reportSpecResults: ' + spec.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     },
                     log: function (str)
                     {
-                        log('Jasmine says: ' + str);
+                        log('Jasmine says: ' + str + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     }
                 };
 				
