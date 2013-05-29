@@ -243,6 +243,8 @@
 			log('Submitting results by building and submitting html form...');			
 		}
 		
+		log('Params=' + JSON.stringify(params));
+		
 		if ( !params.report_html ) {
 			params.report_html = window.TestSwarm.serialize();
 		}
@@ -257,7 +259,6 @@
 				window.parent.postMessage( query, '*' );
 				log('Message posted');
 			}
-
 		} else {
 			form = document.createElement( 'form' );
 			form.action = url;
