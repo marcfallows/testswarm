@@ -1,0 +1,22 @@
+{
+	"database": {
+		"host": "localhost",
+		"database": "testswarm",
+		"username": "testswarm",
+		"password": "1234$abcd"
+	},
+	"client": {
+		"runTimeout": "30"
+	},
+	"web": {
+		"contextpath": "/testswarm",
+		"title": "blinkbox",
+		"ajaxUpdateInterval": "10"
+	},
+	"debug": {
+		"showExceptionDetails": true
+	},
+	"storage": {
+		"cacheDir": "$1/cache"
+	}
+}
