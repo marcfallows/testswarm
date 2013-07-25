@@ -310,6 +310,8 @@
 	// returning false will let it run.
 	window.onerror = function ( error, filePath, linerNr ) {
 		log( 'ERROR: ' + error );
+		log( 'filePath: ' + filePath );
+		log( 'linerNr: ' + linerNr );
 		
 		var ret = false;
 		if ( onErrorFnPrev ) {
