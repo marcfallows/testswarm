@@ -81,16 +81,21 @@
 
 		links = doc.getElementsByTagName( 'link' );
 		for ( i = 0; i < links.length; i += 1 ) {
-			href = links[i].href;
+			// links[i].href is returning full url in chrome even if href attribute is relative
+			//href = links[i].href;
+			// reading the href attribute returns href string is it's set on the element
+			href = links[i].attributes['href'].value;
+			
 			if ( href.indexOf( '/' ) === 0 ) {
 				href = root + href;
 			} else if ( !/^https?:\/\//.test( href ) ) {
 				href = cur + href;
 			}
             
-			//Opera Philips fix
-            if(links[i].href != href){
-			    links[i].href = href;
+			if(links[i].attributes['href'].value != href){
+				// if href was changed we need to put it back to DOM
+			    links[i].attributes['href'].value = href;				
+				//log('new href is ' + href);
             }
 		}
 
@@ -178,9 +183,9 @@
 	
 	function notifyServerAboutStepStart() {
 		var params = {
-			fail: angular.testSwarmResults.fail,
-			error: angular.testSwarmResults.error,
-			total: angular.testSwarmResults.total,
+			fail: window.TestSwarm.result.fail,
+			error: window.TestSwarm.result.error,
+			total: window.TestSwarm.result.total,
 			beatRate: beatRate,
 			action: 'runner',
 			type: 'stepStart'
@@ -216,6 +221,9 @@
 	function submit( params ) {
 		log('Submitting runner results...');	
 
+		notifyServerAboutStepStart();
+		window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out	
+		
 		var form, i, input, key;
 
 		if ( window.curHeartbeat ) {
@@ -235,6 +243,8 @@
 			log('Submitting results by building and submitting html form...');			
 		}
 		
+		log('Params=' + JSON.stringify(params));
+		
 		if ( !params.report_html ) {
 			params.report_html = window.TestSwarm.serialize();
 		}
@@ -249,7 +259,6 @@
 				window.parent.postMessage( query, '*' );
 				log('Message posted');
 			}
-
 		} else {
 			form = document.createElement( 'form' );
 			form.action = url;
@@ -301,6 +310,8 @@
 	// returning false will let it run.
 	window.onerror = function ( error, filePath, linerNr ) {
 		log( 'ERROR: ' + error );
+		log( 'filePath: ' + filePath );
+		log( 'linerNr: ' + linerNr );
 		
 		var ret = false;
 		if ( onErrorFnPrev ) {
@@ -370,47 +381,67 @@
 				var testSwarmReporter = {
                     reportRunnerStarting: function (runner)
                     {
-                        log('Jasmine reportRunnerStarting');
 						// reset counters
 						window.TestSwarm.result = jasmineTestSwarmResults = {
 							fail: 0,
 							error: 0,
 							total: 0
 						};
+                        log('Jasmine reportRunnerStarting: ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     },
                     reportRunnerResults: function (runner)
                     {
                         // testing finished
-						log('Jasmine reportRunnerResults');
+						log('Jasmine reportRunnerResults' + JSON.stringify(jasmineTestSwarmResults || {}));
 						submit(jasmineTestSwarmResults);						
                     },
                     reportSuiteResults: function (suite)
                     {
-                        log('Jasmine reportSuiteResults:' + suite.description);
+                        log('Jasmine reportSuiteResults: ' + suite.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
 						// not in use
                     },
                     reportSpecStarting: function (spec)
                     {
-                        log('Jasmine reportSpecStarting' + spec.description);
-						jasmineTestSwarmResults.total++;
-						window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out
+                        jasmineTestSwarmResults.total++;
+						log('Jasmine reportSpecStarting: ' + spec.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
+						
+						// override beatRate with expected test duration.
+						// jasmine it function cannot take additional parameter with options
+						// duration can be set on the suite ( this.duration = 60 ) before it statement.
+						beatRate = spec.suite.duration || defaultBeatRate;
+						
+						if(!!spec.suite.duration) {
+							delete spec.suite.duration;
+						}
+						
+						notifyServerAboutStepStart();
+						window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out						
                     },
                     reportSpecResults: function (spec)
                     {
-						log('Jasmine reportSpecResults: ' + spec.description);
-						
-                        if(spec.results().failedCount>0)
+						if(spec.results().failedCount>0) {
 							jasmineTestSwarmResults.fail++;
+						}
+						log('Jasmine reportSpecResults: ' + spec.description + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     },
                     log: function (str)
                     {
-                        log('Jasmine says: ' + str);
+                        log('Jasmine says: ' + str + ' ' + JSON.stringify(jasmineTestSwarmResults || {}));
                     }
                 };
 				
 				window.TestSwarm.serialize = function () {
 					// take only the #wrapper and #html as a test result
-					remove('content');					
+					remove('content');	
+
+					// move logger to after jasmine reporter
+					var logger = document.getElementById('loggerWrapper');
+					var reporter = document.getElementsByClassName('jasmine_reporter')[0];
+					if(!!logger && !!reporter) {
+						logger.parentElement.removeChild(logger);
+						reporter.parentElement.appendChild(logger)
+					}					
+					
 					return trimSerialize();
 				};
 				
@@ -536,20 +567,28 @@
 			install: function () {
 				log( 'Installing QUnit support...' );
 				
-				QUnit.done = function ( results ) {
-					submit(window.TestSwarm.result = {
-						fail: results.failed,
-						error: 0,
-						total: results.total
-					});
-				};
-
-				var moduleCount = 0, testCount = 0, logCount = 0;
-				
-				QUnit.testStart = function( name ) {
-					testCount++;
+				var moduleCount = 0, 
 					logCount = 0;
-					var msg = 'QUnit: testStart ' + testCount + ': ' + name.name;
+		
+				window.TestSwarm.result = {
+					fail: 0,
+					error: 0,
+					total: 0
+				};	
+					
+				QUnit.done = function ( results ) {
+					window.TestSwarm.result.fail = results.failed;
+					window.TestSwarm.result.total = results.total;
+					submit(window.TestSwarm.result);
+				};
+				
+				QUnit.testStart = function( nameObj ) {
+					window.TestSwarm.result.total++;
+					logCount = 0;
+					var msg = 'QUnit: testStart ' + window.TestSwarm.result.total + ': ' + nameObj.name;
+					var timeoutMargin = 10;
+                    beatRate = !!nameObj && !!nameObj.config && !!nameObj.config.testTimeout ? (nameObj.config.testTimeout / 1000) + timeoutMargin : defaultBeatRate;
+					notifyServerAboutStepStart();
 					QUnit.heartbeat( {
 						message: msg,
 						cssClass: 'test'

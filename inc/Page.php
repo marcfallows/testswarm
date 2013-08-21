@@ -250,7 +250,7 @@ foreach ( $projects as $project ) {
 ?>
 							</ul>
 						</li>
-						<li><a href="<?php echo swarmpath( 'scores' ); ?>">Scores</a></li>
+						<!--<li><a href="<?php echo swarmpath( 'scores' ); ?>">Scores</a></li>-->
 						<li><a href="<?php echo swarmpath( 'dashboard' ); ?>#table">Dashboard</a></li>
 						<li><a href="<?php echo swarmpath( 'info' ); ?>">Info</a></li>
 						<li><a href="<?php echo swarmpath( 'resetUserCookies.html' ); ?>">Reset Cookies</a></li>
