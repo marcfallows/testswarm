@@ -249,3 +249,9 @@ CREATE INDEX idx_runresults_run_client ON runresults (run_id, client_id);
 
 ALTER TABLE runresults
 	ADD CONSTRAINT fk_runresults_client_id FOREIGN KEY (client_id) REFERENCES clients (id);
+
+--this foreign key is missing by design. we need to be able to delete jobs without loosing results.
+/*
+ALTER TABLE runresults 
+	ADD CONSTRAINT fk_runresults_run_id FOREIGN KEY (run_id) REFERENCES runs (id);
+*/
