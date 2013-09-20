@@ -1,0 +1,53 @@
+{
+	"database": {
+		"host": "localhost",
+		"database": "testswarm_db",
+		"username": "testswarm_db",
+		"password": "1234$abcd"
+	},
+	"web": {
+		"contextpath": "/testswarm"
+	},
+	"storage": {
+		"cacheDir": "$1/cache"
+	},
+	"userAgents": {
+		"Chrome29": {
+			"browserFamily": "Chrome",
+			"browserMajor": "29"
+		},
+		"PhantomJS1.9": {
+			"browserFamily": "PhantomJS",
+			"browserMajor": "1",
+			"browserMinor": "9"
+		},
+		"LG2012": {
+			"browserFamily": "LG",
+			"browserMajor": "2012"
+		},		
+		"LG2013": {
+			"browserFamily": "LG",
+			"browserMajor": "2013"
+		},
+		"Samsung2012": {
+			"browserFamily": "Samsung",
+			"browserMajor": "2012"
+		},		
+		"Samsung2013": {
+			"browserFamily": "Samsung",
+			"browserMajor": "2013"
+		}
+	},
+	"browserSets": {
+		"Default": [
+			"Chrome29",
+			"PhantomJS1.9"
+		],
+		"Primary TVs": [
+			"LG2013",
+			"LG2012",
+			"Samsung2013",
+			"Samsung2012"
+		]
+	}
+}
