@@ -48,6 +48,14 @@
 			"LG2012",
 			"Samsung2013",
 			"Samsung2012"
+		],
+		"LG TVs": [
+			"LG2013",
+			"LG2012"
+		],
+		"Samsung TVs": [
+			"Samsung2013",
+			"Samsung2012"
 		]
 	}
 }

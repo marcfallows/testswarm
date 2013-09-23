@@ -83,7 +83,7 @@ class WipejobAction extends Action {
 		}
 
 		// This should be outside the if for $runRows, because jobs
-		// can sometimes be created without any runs (by accidently).
+		// can sometimes be created without any runs (by accident).
 		// Those should be deletable as well, thus this has to be outside the loop.
 		// Also, no need to do this in a loop, just delete them all in one query.
 		if ( $wipeType === 'delete' ) {

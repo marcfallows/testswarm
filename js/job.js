@@ -8,6 +8,7 @@
 jQuery(function ( $ ) {
 	var updateInterval = SWARM.conf.web.ajaxUpdateInterval * 1000,
 		$wipejobErr = $( '.swarm-wipejob-error' ),
+		$addbrowserstojobErr = $( '.swarm-addbrowserstojob-error' ),
 		$targetTable = $( 'table.swarm-results' ),
 		refreshTableTimout, indicatorText, $indicator;
 
@@ -61,6 +62,10 @@ jQuery(function ( $ ) {
 		$wipejobErr.hide().text( data.error && data.error.info || 'Action failed.' ).slideDown();
 	}
 
+	function addbrowserstojobFail( data ) {
+		$addbrowserstojobErr.hide().text( data.error && data.error.info || 'Action failed.' ).slideDown();
+	}
+
 	function resetRun( $el ) {
 		if ( $el.data( 'runStatus' ) !== 'new' ) {
 			$.ajax({
@@ -95,6 +100,43 @@ jQuery(function ( $ ) {
 			resetRun( $( this ).closest( 'td' ) );
 		});
 
+		$( '.swarm-add-browsers' ).click( function () {
+
+			$addbrowserstojobErr.hide();
+			indicateAction( 'adding browsers' );
+
+			var jobData = {
+				action: 'addbrowserstojob',
+				job_id: SWARM.jobInfo.id,
+				authID: SWARM.auth.project.id,
+				authToken: SWARM.auth.sessionToken
+			};
+
+			var formData = $('.swarm-add-browsers-form').serialize();
+			$('.swarm-add-browsers-form')[0].reset();
+
+			var combinedData = formData + '&' + $.param(jobData);
+
+			$.ajax({
+				url: SWARM.conf.web.contextpath + 'api.php',
+				type: 'POST',
+				data: combinedData,
+				dataType: 'json',
+				success: function ( data ) {
+					actionComplete();
+					if ( data.addbrowserstojob && data.addbrowserstojob.result === 'ok' ) {
+						refreshTable();
+						return;
+					}
+					addbrowserstojobFail( data );
+				},
+				error: function ( error ) {
+					actionComplete();
+					addbrowserstojobFail( error );
+				}
+			});
+		} );
+
 		$( '.swarm-reset-runs-failed' ).on( 'click', function () {
 			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"]' );
 			if ( !$els.length || !window.confirm( 'Are you sure you want to reset all failed runs?' ) ) {
@@ -103,7 +145,8 @@ jQuery(function ( $ ) {
 			$els.each( function () {
 				resetRun( $( this ) );
 			});
-		});
+		} );
+
 		$( '.swarm-delete-job' ).click( function () {
 			if ( !window.confirm( 'Are you sure you want to delete this job?' ) ) {
 				return;
@@ -154,7 +197,7 @@ jQuery(function ( $ ) {
 					job_id: SWARM.jobInfo.id,
 					type: 'reset',
 					authID: SWARM.auth.project.id,
-					authToken: SWARM.auth.sessionTokens
+					authToken: SWARM.auth.sessionToken
 				},
 				dataType: 'json',
 				success: function ( data ) {

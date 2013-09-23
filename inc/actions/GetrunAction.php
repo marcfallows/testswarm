@@ -43,8 +43,12 @@ class GetrunAction extends Action {
 		$client = Client::newFromContext( $this->getContext(), $runToken, $clientID );
 
 		// Get oldest idle (status=0) run for this user agent.
-		// Except if it was already ran in this client in the past (client_id=%u), because
-		// in that case it must've failed. We don't want it to run in the same client again.
+
+        // We (blinkbox) DO want any available client to run the test, so remove this condition:
+            // Except if it was already ran in this client in the past (client_id=%u), because
+            // AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
+        	// in that case it must've failed. We don't want it to run in the same client again.
+
 		$runID = $db->getOne(str_queryf(
 			'SELECT
 				run_id
@@ -52,7 +56,6 @@ class GetrunAction extends Action {
 				run_useragent
 			WHERE useragent_id = %s
 			AND   status = 0
-			AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
 			ORDER BY run_id DESC
 			LIMIT 1;',
 			$browserInfo->getSwarmUaID(),

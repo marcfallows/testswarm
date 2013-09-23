@@ -51,12 +51,36 @@ class JobPage extends Page {
 
 		if ( $isOwner ) {
 			$html .= '<script>SWARM.jobInfo = ' . json_encode( $data["info"] ) . ';</script>';
-			$action_bar = '<div class="form-actions swarm-item-actions">'
-				. ' <button class="swarm-reset-runs-failed btn btn-info">Reset failed runs</button>'
-				. ' <button class="swarm-reset-runs btn btn-info">Reset all runs</button>'
-				. ' <button class="swarm-delete-job btn btn-danger">Delete job</button>'
-				. '</div>'
-				. '<div class="alert alert-error" id="swarm-wipejob-error" style="display: none;"></div>';
+			$action_bar = ' <div class="form-actions swarm-item-actions">'
+					. ' <div class="pull-right">'
+						. ' <button type="button" data-toggle="modal" data-target="#addbrowserstojobModal" class="btn btn-success">Add browsers</button>'
+						. ' <div class="btn-group">'
+							. ' <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Reset <span class="caret"></span></button>'
+							. ' <ul class="dropdown-menu">'
+								. ' <li><a href="#" class="left swarm-reset-runs">All</a></li>'
+								. ' <li><a href="#" class="left swarm-reset-runs-failed">Failed</a></li>'
+								. ' <li><a href="#" class="left swarm-reset-runs-suspended">Suspended</a></li>'
+							. ' </ul>'
+						. ' </div>'
+						. ' <button class="swarm-suspend-runs btn btn-warning">Suspend job</button>'
+						. ' <button class="swarm-delete-job btn btn-danger">Delete job</button>'
+					. ' </div>'
+				. ' </div>'
+				. ' <div id="addbrowserstojobModal" class="modal hide fade" tabindex="-1" role="dialog">'
+					. ' <div class="modal-header">'
+						. ' <button type="button" class="close" data-dismiss="modal">×</button>'
+						. ' <h3>Add browsers</h3>'
+					. ' </div>'
+					. ' <div class="modal-body">'
+						. $this->getAddbrowserstojobFormHtml()
+					. ' </div>'
+					. ' <div class="modal-footer">'
+						. ' <button class="btn" data-dismiss="modal">Close</button>'
+						. ' <button class="swarm-add-browsers btn btn-primary" data-dismiss="modal">Add</button>'
+					. ' </div>'
+				. ' </div>'
+				. ' <div class="alert alert-error swarm-wipejob-error" style="display: none;"></div>'
+				. ' <div class="alert alert-error swarm-addbrowserstojob-error" style="display: none;"></div>';
 		} else {
 			$action_bar = '';
 		}
@@ -71,6 +95,69 @@ class JobPage extends Page {
 		$html .= $action_bar;
 
 		return $html;
+	}
+
+	protected function getAddbrowserstojobFormHtml(){
+		$conf = $this->getContext()->getConf();
+		$browserIndex = BrowserInfo::getBrowserIndex();
+
+		$formHtml = <<<HTML
+<form class="form-horizontal swarm-add-browsers-form">
+
+	<fieldset>
+		<legend>Job information</legend>
+
+
+		<div class="control-group">
+			<label class="control-label" for="form-runMax">Run max:</label>
+			<div class="controls">
+				<input type="number" name="runMax" required min="1" max="99" value="2" id="form-runMax" size="5">
+				<p class="help-block">This is the maximum number of times a run is ran in a user agent. If a run passes
+				without failures then it is only ran once. If it does not pass, TestSwarm will re-try the run
+				(up to "Run max" times) for that useragent to avoid error pollution due to time-outs, slow
+				computers or other unrelated conditions that can cause the server to not receive a success report.</p>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>Browsers</legend>
+
+		<p>Choose which groups of user agents this job should be ran in. Some of the groups may
+		overlap each other, TestSwarm will detect and remove duplicate entries in the resulting set.</p>
+
+HTML;
+		foreach ( $conf->browserSets as $browserSet => $browsers ) {
+			$set = htmlspecialchars( $browserSet );
+			$browsersHtml = '';
+			$last = count( $browsers ) -1;
+			foreach ( $browsers as $i => $uaID ) {
+				$uaData = $browserIndex->$uaID;
+				if ( $i === 0 ) {
+					$browsersHtml .= '<br>';
+				} elseif ( $i === $last ) {
+					$browsersHtml .= '<br> and ';
+				} else {
+					$browsersHtml .= ',<br>';
+				}
+				$browsersHtml .= htmlspecialchars( $uaData->displayInfo['title'] );
+			}
+			$formHtml .= <<<HTML
+		<div class="control-group">
+			<label class="checkbox" for="form-browserset-$set">
+				<input type="checkbox" name="browserSets[]" value="$set" id="form-browserset-$set">
+				<strong>$set</strong>: $browsersHtml.
+			</label>
+		</div>
+HTML;
+		}
+
+		$formHtml .= <<<HTML
+	</fieldset>
+</form>
+HTML;
+
+		return $formHtml;
 	}
 
 	/**

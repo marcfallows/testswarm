@@ -25,7 +25,7 @@ abstract class Action {
 		// internal-error is exclusively for use by the exception handler
 		'internal-error' => 'An internal error occurred. Action could not be performed.',
 		'invalid-input' => 'One or more input fields were invalid.',
-		'missing-parameters' => 'One ore more required fields were not submitted.',
+		'missing-parameters' => 'One or more required fields were not submitted.',
 		'requires-post' => 'This action requires a POST request.',
 		'unauthorized' => 'This action requires authorization. The token or username may be missing or invalid.',
 		'data-corrupt' => 'Data was retreived but was found to be corrupt or incomplete.',
