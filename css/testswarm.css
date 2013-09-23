@@ -82,6 +82,10 @@ h2 + .row {
 	display: inline-block;
 }
 
+.swarm-browsermenu {
+    text-align: left;
+}
+
 /**
  * Results table.
  * The swarm-status colors are now all derived from the following greens:
@@ -208,6 +212,15 @@ h2 + .row {
 .swarm-status-failed,
 .swarm-status-failed a {
 	color: #874545;
+}
+
+.swarm-status-suspended {
+    background: #ffffff;
+}
+
+.swarm-status-suspended,
+.swarm-status-suspended a {
+    color: #666;
 }
 
 .swarm-status-notscheduled {

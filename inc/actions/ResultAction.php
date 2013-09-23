@@ -24,6 +24,9 @@ class ResultAction extends Action {
 	// was determined that the client died (no longer sends pings).
 	public static $STATE_LOST = 4;
 
+	// Has been suspended.
+	public static $STATE_SUSPENDED = 5;
+
 	/**
 	 * @actionParam int item: Runresults ID.
 	 */
@@ -113,7 +116,7 @@ class ResultAction extends Action {
 		// If still busy or if the client was lost, then the last update time is irrelevant
 		// Alternatively this could test if $row->updated == $row->created, which would effectively
 		// do the same.
-		if ( $row->status == self::$STATE_BUSY || $row->status == self::$STATE_LOST ) {
+		if ( $row->status == self::$STATE_BUSY || $row->status == self::$STATE_LOST || $row->status == self::$STATE_SUSPENDED ) {
 			$data['info']['runTime'] = null;
 		} else {
 			$data['info']['runTime'] = gmstrtotime( $row->updated ) - gmstrtotime( $row->created );
@@ -130,6 +133,7 @@ class ResultAction extends Action {
 		$mapping[self::$STATE_FINISHED] = 'Finished';
 		$mapping[self::$STATE_ABORTED] = 'Aborted';
 		$mapping[self::$STATE_LOST] = 'Client lost';
+		$mapping[self::$STATE_SUSPENDED] = 'Suspended';
 
 		return isset( $mapping[$statusId] )
 			? $mapping[$statusId]

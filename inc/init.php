@@ -90,6 +90,7 @@ $swarmAutoLoadClasses = array(
 	'SaverunAction' => 'inc/actions/SaverunAction.php',
 	'SwarmstateAction' => 'inc/actions/SwarmstateAction.php',
 	'WipejobAction' => 'inc/actions/WipejobAction.php',
+	'WipebrowserjobAction' => 'inc/actions/WipebrowserjobAction.php',
 	'WiperunAction' => 'inc/actions/WiperunAction.php',
 	# Pages
 	'AddjobPage' => 'inc/pages/AddjobPage.php',

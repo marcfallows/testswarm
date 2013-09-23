@@ -154,9 +154,15 @@ class JobAction extends Action {
 
 
 					if ( !$runUaRow->results_id ) {
-						$runUaRuns[$runUaRow->useragent_id] = array(
-							'runStatus' => 'new',
-						);
+						if($runUaRow->status == ResultAction::$STATE_SUSPENDED){
+							$runUaRuns[$runUaRow->useragent_id] = array(
+								'runStatus' => 'suspended',
+							);
+						} else {
+							$runUaRuns[$runUaRow->useragent_id] = array(
+								'runStatus' => 'new',
+							);
+						}
 					} else {
 						$runresultsRow = $db->getRow(str_queryf(
 							'SELECT
@@ -240,6 +246,7 @@ class JobAction extends Action {
 			'passed',
 			'new',
 			'progress',
+			'suspended',
 			'lost',
 			'timedout',
 			'failed',
@@ -291,6 +298,9 @@ class JobAction extends Action {
 		}
 		if ( $status === ResultAction::$STATE_ABORTED ) {
 			return 'timedout';
+		}
+		if ( $status === ResultAction::$STATE_SUSPENDED) {
+			return 'suspended';
 		}
 		if ( $status === ResultAction::$STATE_LOST ) {
 			return 'lost';

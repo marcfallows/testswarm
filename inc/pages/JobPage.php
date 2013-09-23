@@ -57,9 +57,9 @@ class JobPage extends Page {
 						. ' <div class="btn-group">'
 							. ' <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Reset <span class="caret"></span></button>'
 							. ' <ul class="dropdown-menu">'
-								. ' <li><a href="#" class="left swarm-reset-runs">All</a></li>'
-								. ' <li><a href="#" class="left swarm-reset-runs-failed">Failed</a></li>'
-								. ' <li><a href="#" class="left swarm-reset-runs-suspended">Suspended</a></li>'
+								. ' <li><a href="#" class="swarm-reset-runs">All</a></li>'
+								. ' <li><a href="#" class="swarm-reset-runs-failed">Failed</a></li>'
+								. ' <li><a href="#" class="swarm-reset-runs-suspended">Suspended</a></li>'
 							. ' </ul>'
 						. ' </div>'
 						. ' <button class="swarm-suspend-runs btn btn-warning">Suspend job</button>'
@@ -87,7 +87,7 @@ class JobPage extends Page {
 
 		$html .= $action_bar;
 		$html .= '<table class="table table-bordered swarm-results"><thead>'
-			. self::getUaHtmlHeader( $data['userAgents'] )
+			. self::getUaHtmlHeader( $data['userAgents'], true )
 			. '</thead><tbody>'
 			. self::getUaRunsHtmlRows( $data['runs'], $data['userAgents'], $isOwner )
 			. '</tbody></table>';
@@ -163,20 +163,42 @@ HTML;
 	/**
 	 * Create a table header for user agents.
 	 */
-	public static function getUaHtmlHeader( $userAgents ) {
+	public static function getUaHtmlHeader( $userAgents, $isJob = false ) {
 		$html = '<tr><th>&nbsp;</th>';
-		foreach ( $userAgents as $userAgent ) {
+		foreach ( $userAgents as $uaID => $userAgent ) {
 			$displayInfo = $userAgent['displayInfo'];
-			$html .= '<th>'
+			$html .= html_tag_open( 'th', array(
+					'data-useragent-id' => $uaID
+				) )
 				. html_tag( 'div', array(
 					'class' => $displayInfo['class'] . ' swarm-icon-small',
-					'title' => $displayInfo['title'],
+					'title' => $displayInfo['title']
 				) )
-				. '<br>'
+				. ' <br>'
 				. html_tag_open( 'span', array(
 					'class' => 'label swarm-browsername',
-				) ) . $displayInfo['labelHtml'] . '</span>'
-				. '</th>';
+				) ) . $displayInfo['labelHtml'] . '</span><br>';
+
+
+			if( $isJob ){
+				$html .= ' <br>'
+					. html_tag_open( 'div', array(
+						'class' => 'swarm-browsermenu',
+					) )
+						. ' <div class="btn-group btn-block">'
+						. ' <button class="btn btn-block btn-info dropdown-toggle" data-toggle="dropdown"><span class="icon-th-list icon-white"></button>'
+							. ' <ul class="dropdown-menu">'
+								. ' <li><a href="#" class="swarm-reset-browser-runs">Reset All</a></li>'
+								. ' <li><a href="#" class="swarm-reset-browser-runs-failed">Reset Failed</a></li>'
+								. ' <li><a href="#" class="swarm-reset-browser-runs-suspended">Reset Suspended</a></li>'
+								. ' <li><a href="#" class="swarm-suspend-browser-runs">Suspend</a></li>'
+								. ' <li><a href="#" class="swarm-delete-browser-runs">Delete</a></li>'
+							. ' </ul>'
+						. ' </div>'
+					. ' </div>';
+			}
+
+			$html .= ' </th>';
 		}
 
 		$html .= '</tr>';
@@ -257,6 +279,7 @@ HTML;
 		static $icons = array(
 			"new" => '<i class="icon-time" title="Scheduled, awaiting run."></i>',
 			"progress" => '<i class="icon-repeat swarm-status-progressicon" title="In progress.."></i>',
+			"suspended" => '<i class="icon-minus-sign" title="Suspended"></i>',
 			"passed" => '<i class="icon-ok" title="Passed!"></i>',
 			"failed" => '<i class="icon-remove" title="Completed with failures"></i>',
 			"timedout" => '<i class="icon-flag" title="Maximum execution time exceeded"></i>',
@@ -295,6 +318,10 @@ HTML;
 			. '<tr><td class="swarm-status swarm-status-timedout">'
 				. self::getStatusIconHtml( "timedout" )
 				. '</td><td>Maximum execution time exceeded</td>'
+			. '</tr>'
+			. '<tr><td class="swarm-status swarm-status-suspended">'
+				. self::getStatusIconHtml( "suspended" )
+				. '</td><td>Suspended</td>'
 			. '</tr>'
 			. '<tr><td class="swarm-status swarm-status-error">'
 				. self::getStatusIconHtml( "error" )
