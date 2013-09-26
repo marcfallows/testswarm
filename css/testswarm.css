@@ -398,6 +398,35 @@ h2 + .row {
 	background-image: url(../img/browser-webkit.png);
 }
 
+.swarm-browser-phantomjs {
+    background-image: url(../img/browser-phantomjs.png);
+}
+
+.swarm-browser-samsung {
+    background-image: url(../img/browser-samsung.png);
+}
+
+.swarm-browser-toshiba {
+    background-image: url(../img/browser-toshiba.png);
+}
+
+.swarm-browser-lg {
+    background-image: url(../img/browser-lg.png);
+}
+
+.swarm-browser-philips {
+    background-image: url(../img/browser-philips.png);
+}
+
+.swarm-browser-technika_avtrex,
+.swarm-browser-technika_mstar {
+    background-image: url(../img/browser-technika.png);
+}
+
+.swarm-browser-panasonic {
+    background-image: url(../img/browser-panasonic.png);
+}
+
 .swarm-device-ipad {
 	background-image: url(../img/device-ipad.png);
 }
@@ -430,7 +459,7 @@ h2 + .row {
 }
 
 .swarm-os-mac_os_x::after {
-	background-image: url(../img/os-macosx.png);
+    background-image: url(../img/os-macosx.png);
 }
 
 .swarm-os-windows::after,
@@ -445,6 +474,10 @@ h2 + .row {
 
 .swarm-os-windows_8::after {
 	background-image: url(../img/os-win8.png);
+}
+
+.swarm-os-linux::after {
+    background-image: url(../img/os-linux.png);
 }
 
 .swarm-icon-small {
