@@ -7,6 +7,9 @@
  * @package TestSwarm
  */
 class JobAction extends Action {
+
+	public static $STATE_SUSPENDED = 3;
+
 	protected $item, $runs, $userAgents;
 
 	/**
@@ -154,7 +157,7 @@ class JobAction extends Action {
 
 
 					if ( !$runUaRow->results_id ) {
-						if($runUaRow->status == ResultAction::$STATE_SUSPENDED){
+						if($runUaRow->status == JobAction::$STATE_SUSPENDED) {
 							$runUaRuns[$runUaRow->useragent_id] = array(
 								'runStatus' => 'suspended',
 							);
@@ -249,6 +252,7 @@ class JobAction extends Action {
 			'suspended',
 			'lost',
 			'timedout',
+			'heartbeat',
 			'failed',
 			'error', // highest priority
 		));
@@ -281,7 +285,7 @@ class JobAction extends Action {
 
 	/**
 	 * @param $row object: Database row from runresults.
-	 * @return string: One of 'progress', 'passed', 'failed', 'timedout', 'error', or 'lost'
+	 * @return string: One of 'progress', 'passed', 'failed', 'timedout', 'error', 'heartbeat', or 'lost'
 	 */
 	public static function getRunresultsStatus( $row ) {
 		$status = (int)$row->status;
@@ -289,18 +293,23 @@ class JobAction extends Action {
 			return 'progress';
 		}
 		if ( $status === ResultAction::$STATE_FINISHED ) {
+			// BLINKBOX NOTE: we might have few tests where total might be equal to 0 and it should be considered as success
+			if ( intval( $row->error ) === 0 && intval( $row->fail ) === 0 ) {
+				return 'passed';
+			}
+
 			// A total of 0 tests ran is also considered an error
 			if ( $row->error > 0 || intval( $row->total ) === 0 ) {
 				return 'error';
 			}
-			// Passed or failed
-			return $row->fail > 0 ? 'failed' : 'passed';
+
+			return 'failed';
 		}
 		if ( $status === ResultAction::$STATE_ABORTED ) {
 			return 'timedout';
 		}
-		if ( $status === ResultAction::$STATE_SUSPENDED) {
-			return 'suspended';
+		if ( $status === ResultAction::$STATE_HEARTBEAT) {
+			return 'heartbeat';
 		}
 		if ( $status === ResultAction::$STATE_LOST ) {
 			return 'lost';

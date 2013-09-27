@@ -27,6 +27,7 @@ abstract class Action {
 		'invalid-input' => 'One or more input fields were invalid.',
 		'missing-parameters' => 'One or more required fields were not submitted.',
 		'requires-post' => 'This action requires a POST request.',
+		'requires-get' => 'This action requires a GET request.',
 		'unauthorized' => 'This action requires authorization. The token or username may be missing or invalid.',
 		'data-corrupt' => 'Data was retreived but was found to be corrupt or incomplete.',
 	);

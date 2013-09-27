@@ -96,7 +96,7 @@ class WipebrowserjobAction extends Action {
 							AND useragent_id = %s;',
 						swarmdb_dateformat( SWARM_NOW ),
 						$runRow->id,
-						ResultAction::$STATE_SUSPENDED,
+						JobAction::$STATE_SUSPENDED,
 						$useragentID
 					));
 				} elseif ( $wipeType === 'suspend' ) {
@@ -108,7 +108,7 @@ class WipebrowserjobAction extends Action {
 						WHERE run_id = %u
 							AND status = 0
 							AND useragent_id = %s;',
-						ResultAction::$STATE_SUSPENDED,
+						JobAction::$STATE_SUSPENDED,
 						swarmdb_dateformat( SWARM_NOW ),
 						$runRow->id,
 						$useragentID

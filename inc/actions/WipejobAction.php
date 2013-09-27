@@ -90,7 +90,7 @@ class WipejobAction extends Action {
 							AND status = %u;',
 						swarmdb_dateformat( SWARM_NOW ),
 						$runRow->id,
-						ResultAction::$STATE_SUSPENDED
+						JobAction::$STATE_SUSPENDED
 					));
 				} elseif ( $wipeType === 'suspend' ) {
 					$db->query(str_queryf(
@@ -100,7 +100,7 @@ class WipejobAction extends Action {
 							updated = %s
 						WHERE run_id = %u
 							AND status = 0;',
-						ResultAction::$STATE_SUSPENDED,
+						JobAction::$STATE_SUSPENDED,
 						swarmdb_dateformat( SWARM_NOW ),
 						$runRow->id
 					));

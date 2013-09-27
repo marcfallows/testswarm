@@ -201,6 +201,7 @@ h2 + .row {
 
 .swarm-status-timedout,
 .swarm-status-error,
+.swarm-status-heartbeat,
 .swarm-status-failed {
 	background: #EFD7D7;
 }
@@ -209,6 +210,8 @@ h2 + .row {
 .swarm-status-timedout a,
 .swarm-status-error,
 .swarm-status-error a,
+.swarm-status-heartbeat,
+.swarm-status-heartbeat a,
 .swarm-status-failed,
 .swarm-status-failed a {
 	color: #874545;

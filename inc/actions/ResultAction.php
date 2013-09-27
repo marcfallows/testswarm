@@ -25,7 +25,7 @@ class ResultAction extends Action {
 	public static $STATE_LOST = 4;
 
 	// Has been suspended.
-	public static $STATE_SUSPENDED = 5;
+	public static $STATE_HEARTBEAT = 5;
 
 	/**
 	 * @actionParam int item: Runresults ID.
@@ -102,7 +102,7 @@ class ResultAction extends Action {
 			'id' => intval( $row->id ),
 			'runID' => intval( $row->run_id ),
 			'clientID' => intval( $row->client_id ),
-			'status' => self::getStatus( $row->status ),
+			'status' => self::getStatus( $row->status )
 		);
 
 		$data['client'] = array(
@@ -116,7 +116,7 @@ class ResultAction extends Action {
 		// If still busy or if the client was lost, then the last update time is irrelevant
 		// Alternatively this could test if $row->updated == $row->created, which would effectively
 		// do the same.
-		if ( $row->status == self::$STATE_BUSY || $row->status == self::$STATE_LOST || $row->status == self::$STATE_SUSPENDED ) {
+		if ( $row->status == self::$STATE_BUSY || $row->status == self::$STATE_LOST || $row->status == self::$STATE_HEARTBEAT ) {
 			$data['info']['runTime'] = null;
 		} else {
 			$data['info']['runTime'] = gmstrtotime( $row->updated ) - gmstrtotime( $row->created );
@@ -133,7 +133,7 @@ class ResultAction extends Action {
 		$mapping[self::$STATE_FINISHED] = 'Finished';
 		$mapping[self::$STATE_ABORTED] = 'Aborted';
 		$mapping[self::$STATE_LOST] = 'Client lost';
-		$mapping[self::$STATE_SUSPENDED] = 'Suspended';
+		$mapping[self::$STATE_HEARTBEAT] = 'Heartbeat';
 
 		return isset( $mapping[$statusId] )
 			? $mapping[$statusId]

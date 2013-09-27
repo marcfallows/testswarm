@@ -152,6 +152,7 @@ CREATE TABLE `run_useragent` (
   -- 0 = idle (awaiting (re-)run)
   -- 1 = busy (being run by a client)
   -- 2 = done (passed and/or reached max)
+  -- 3 = suspended (suspended by user)
   `status` tinyint unsigned NOT NULL default 0,
 
   -- Key to runresults.id field.
@@ -195,6 +196,7 @@ CREATE TABLE `runresults` (
   -- 2 = finished
   -- 3 = timed-out (maximum execution time exceeded)
   -- 4 = timed-out (client lost, set from CleanupAction)
+  -- 5 = heartbeat
   `status` tinyint unsigned NOT NULL default 0,
 
   -- Total number of tests ran.
@@ -217,6 +219,9 @@ CREATE TABLE `runresults` (
 
   -- YYYYMMDDHHMMSS timestamp.
   `updated` binary(14) NOT NULL,
+
+  -- YYYYMMDDHHMMSS timestamp. update is expected to be before this timestamp.
+  `expected_update` binary(14) NULL,
 
   -- YYYYMMDDHHMMSS timestamp.
   `created` binary(14) NOT NULL

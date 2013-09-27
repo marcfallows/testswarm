@@ -150,7 +150,7 @@ jQuery(function ( $ ) {
 			var $th = $( this ).closest( 'th' );
 			var $userAgentData = $th.data( 'useragentId' );
 
-			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"]' ).filter('td[data-useragent-id="' + $userAgentData + '"');
+			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"]' ).filter( $('td[data-useragent-id="' + $userAgentData + '"') );
 
 			if ( !$els.length || !window.confirm( 'Are you sure you want to reset the suspended runs for this browser?' ) ) {
 				return;

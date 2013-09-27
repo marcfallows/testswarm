@@ -283,6 +283,7 @@ HTML;
 			"passed" => '<i class="icon-ok" title="Passed!"></i>',
 			"failed" => '<i class="icon-remove" title="Completed with failures"></i>',
 			"timedout" => '<i class="icon-flag" title="Maximum execution time exceeded"></i>',
+			"heartbeat" => '<i class="icon-heart" title="Heartbeat caused result submission"></i>',
 			"error" => '<i class="icon-warning-sign" title="Aborted by an error"></i>',
 			"lost" => '<i class="icon-question-sign" title="Client lost connection with the swarm"></i>',
 		);
@@ -316,8 +317,12 @@ HTML;
 				. '</td><td>Completed with failures</td>'
 			. '</tr>'
 			. '<tr><td class="swarm-status swarm-status-timedout">'
-				. self::getStatusIconHtml( "timedout" )
-				. '</td><td>Maximum execution time exceeded</td>'
+			. self::getStatusIconHtml( "timedout" )
+			. '</td><td>Maximum execution time exceeded</td>'
+			. '</tr>'
+			. '<tr><td class="swarm-status swarm-status-heartbeat">'
+			. self::getStatusIconHtml( "heartbeat" )
+			. '</td><td>Heartbeat caused result submission</td>'
 			. '</tr>'
 			. '<tr><td class="swarm-status swarm-status-suspended">'
 				. self::getStatusIconHtml( "suspended" )

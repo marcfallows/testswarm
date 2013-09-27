@@ -87,6 +87,7 @@ $swarmAutoLoadClasses = array(
 	'ProjectAction' => 'inc/actions/ProjectAction.php',
 	'ProjectsAction' => 'inc/actions/ProjectsAction.php',
 	'ResultAction' => 'inc/actions/ResultAction.php',
+	'RunnerAction' => 'inc/actions/RunnerAction.php',
 	'SaverunAction' => 'inc/actions/SaverunAction.php',
 	'SwarmstateAction' => 'inc/actions/SwarmstateAction.php',
 	'WipejobAction' => 'inc/actions/WipejobAction.php',
