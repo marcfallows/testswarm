@@ -212,6 +212,7 @@ class ProjectAction extends Action {
 		$password = isset( $options['password'] ) ? $options['password'] : null;
 		$displayTitle = isset( $options['displayTitle'] ) ? $options['displayTitle'] : null;
 		$siteUrl = isset( $options['siteUrl'] ) ? $options['siteUrl'] : '';
+		$priority = isset( $options['priority'] ) && is_numeric( $options['priority'] ) ? intval( $options['priority'] ) : false;
 
 		if ( !$id || !$displayTitle || !$password ) {
 			$this->setError( 'missing-parameters' );
@@ -233,7 +234,13 @@ class ProjectAction extends Action {
 
 		// maxlength (otherwise MySQL will crop it)
 		if ( strlen( $displayTitle ) > 255 ) {
-			$this->setError( 'Display title has to be no longer than 255 characters.' );
+			$this->setError( 'invalid-input', 'Display title has to be no longer than 255 characters.' );
+			return;
+		}
+
+		// Validate priority
+		if ( $priority === false ) {
+			$this->setError( 'invalid-input', 'Priority must be a number.' );
 			return;
 		}
 
@@ -243,11 +250,12 @@ class ProjectAction extends Action {
 
 		$isInserted = $db->query(str_queryf(
 			'INSERT INTO projects
-			(id, display_title, site_url, password, auth_token, updated, created)
-			VALUES(%s, %s, %s, %s, %s, %s, %s);',
+			(id, display_title, site_url, priority, password, auth_token, updated, created)
+			VALUES(%s, %s, %s, %u, %s, %s, %s, %s);',
 			$id,
 			$displayTitle,
 			$siteUrl,
+			$priority,
 			LoginAction::generatePasswordHash( $password ),
 			$authTokenHash,
 			swarmdb_dateformat( SWARM_NOW ),

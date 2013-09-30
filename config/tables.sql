@@ -15,6 +15,9 @@ CREATE TABLE `projects` (
   -- (Optional field, can be empty).
   `site_url` blob,
 
+  -- Project priority to decide which job runs first.
+  `priority` int unsigned NOT NULL default 1,
+
   -- Salted hash of password (see LoginAction::comparePasswords).
   `password` tinyblob NOT NULL,
 

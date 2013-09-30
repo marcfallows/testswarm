@@ -19,6 +19,7 @@ class ManageProjectScript extends MaintenanceScript {
 		$this->registerOption( 'id', 'value', 'ID of project (must be in format: "' . LoginAction::getNameValidationRegex() . '").' );
 		$this->registerOption( 'display-title', 'value', 'Display title (free form text, max: 255 chars)' );
 		$this->registerOption( 'password', 'value', 'Password for this project (omit to enter in interactive mode)' );
+		$this->registerOption( 'priority', 'value', 'Priority for this project (optional, default 1)' );
 		$this->registerOption( 'site-url', 'value', 'URL for this project (optional)' );
 	}
 
@@ -39,10 +40,15 @@ class ManageProjectScript extends MaintenanceScript {
 		$id = $this->getOption( 'id' );
 		$displayTitle = $this->getOption( 'display-title' );
 		$password = $this->getOption( 'password' );
+		$priority = $this->getOption( 'priority' );
 		$siteUrl = $this->getOption( 'site-url' );
 
 		if ( !$id || !$displayTitle ) {
 			$this->error( '--id and --display-title are required.' );
+		}
+
+		if ( !$priority ) {
+			$priority = 1;
 		}
 
 		if ( !$password ) {
@@ -65,6 +71,7 @@ class ManageProjectScript extends MaintenanceScript {
 
 		$data = $action->create( $id, array(
 			'password' => $password,
+			'priority' => $priority,
 			'displayTitle' => $displayTitle,
 			'siteUrl' => $siteUrl,
 		) ) ;
@@ -91,6 +98,7 @@ class ManageProjectScript extends MaintenanceScript {
 
 		$id = $this->getOption( 'id' );
 		$displayTitle = $this->getOption( 'display-title' );
+		$priority = $this->getOption( 'priority' );
 		$siteUrl = $this->getOption( 'site-url' );
 
 		if ( !$id ) {
@@ -103,7 +111,7 @@ class ManageProjectScript extends MaintenanceScript {
 			$this->error( 'Project does not exist. Set --create to create a project.' );
 		}
 
-		if ( !$displayTitle && !$siteUrl ) {
+		if ( !$displayTitle && !$priority && !$siteUrl ) {
 			$this->error( 'Unable to perform update. No values provided.' );
 		}
 
@@ -111,6 +119,18 @@ class ManageProjectScript extends MaintenanceScript {
 			$isUpdated = $db->query(str_queryf(
 				'UPDATE projects SET display_title = %s, updated = %s WHERE id = %s;',
 				$displayTitle,
+				swarmdb_dateformat( SWARM_NOW ),
+				$id
+			));
+			if ( !$isUpdated ) {
+				$this->error( 'Failed to update database.' );
+			}
+		}
+
+		if ( $priority ) {
+			$isUpdated = $db->query(str_queryf(
+				'UPDATE projects SET priority = %u, updated = %s WHERE id = %s;',
+				$priority,
 				swarmdb_dateformat( SWARM_NOW ),
 				$id
 			));
