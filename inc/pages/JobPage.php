@@ -87,7 +87,7 @@ class JobPage extends Page {
 
 		$html .= $action_bar;
 		$html .= '<table class="table table-bordered swarm-results"><thead>'
-			. self::getUaHtmlHeader( $data['userAgents'], true )
+			. self::getUaHtmlHeader( $data['userAgents'], $isOwner )
 			. '</thead><tbody>'
 			. self::getUaRunsHtmlRows( $data['runs'], $data['userAgents'], $isOwner )
 			. '</tbody></table>';
@@ -163,7 +163,8 @@ HTML;
 	/**
 	 * Create a table header for user agents.
 	 */
-	public static function getUaHtmlHeader( $userAgents, $isJob = false ) {
+	public static function getUaHtmlHeader( $userAgents, $showButtons = false ) {
+
 		$html = '<tr><th>&nbsp;</th>';
 		foreach ( $userAgents as $uaID => $userAgent ) {
 			$displayInfo = $userAgent['displayInfo'];
@@ -180,7 +181,7 @@ HTML;
 				) ) . $displayInfo['labelHtml'] . '</span><br>';
 
 
-			if( $isJob ){
+			if( $showButtons ){
 				$html .= ' <br>'
 					. html_tag_open( 'div', array(
 						'class' => 'swarm-browsermenu',

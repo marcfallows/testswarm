@@ -22,6 +22,7 @@
 		"nonewrunsSleep": 10,
 		"pingTime": 30,
 		"pingTimeMargin": 10,
+		"outdatedTime": 172800,
 		"runTimeout": 180,
 		"saveReqTimeout": 10,
 		"saveRetryMax": 3,

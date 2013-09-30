@@ -162,6 +162,11 @@ class Client {
 		return time() - ( $conf->client->pingTime + $conf->client->pingTimeMargin );
 	}
 
+	public static function getMaxOutdatedAge( TestSwarmContext $context ) {
+		$conf = $context->getConf();
+		return time() - ( $conf->client->outdatedTime );
+	}
+
 	/** Don't allow direct instantiations of this class, use newFromContext instead. */
 	private function __construct() {}
 }
