@@ -83,7 +83,7 @@ class ProjectAction extends Action {
 		));
 
 		if ( $dir === 'back' ) {
-			array_reverse( $jobRows );
+			$jobRows = array_reverse( $jobRows );
 		}
 
 		$jobs = array();
@@ -146,6 +146,7 @@ class ProjectAction extends Action {
 	}
 
 	private function getPaginationData( $dir, $offset, $limit, &$jobRows, $projectID ) {
+		$limitUrl = '';
 		if ( $limit !== $this->defaultLimit ) {
 			$limitUrl = '&limit=' . $limit;
 		}
@@ -162,20 +163,18 @@ class ProjectAction extends Action {
 		} else {
 			$firstRowID = '';
 			$lastRowID = '';
-
 		}
 
 		if ( $dir === 'back' ) {
 			$isFirst = $numRows <= $limit;
 			$isLast = !$offset;
-			$firstID = $firstRowID;
-			$lastID = $lastRowID;
 		} else {
 			$isFirst = !$offset;
 			$isLast = $numRows <= $limit;
-			$firstID = $lastRowID;
-			$lastID = $firstRowID;
 		}
+
+		$firstID = $firstRowID;
+		$lastID = $lastRowID;
 
 		if ( $isFirst ) {
 			$prev = false;
