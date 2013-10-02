@@ -68,7 +68,6 @@ class RunnerAction extends Action {
 					$total,
 					swarmdb_dateformat( $expected_update ),
 					swarmdb_dateformat( $now ),
-
 					$resultsId
 				));
 

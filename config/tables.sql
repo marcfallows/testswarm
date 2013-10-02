@@ -239,3 +239,83 @@ CREATE INDEX idx_runresults_status_client ON runresults (status, client_id);
 
 -- Usage: ScoresAction.
 CREATE INDEX idx_runresults_client_total ON runresults (client_id, total);
+
+
+-- Project lookup table to see the last updated run by project per useragent.
+-- This allows us to more efficiently query the next run.
+
+CREATE TABLE `project_updated` (
+  -- Key to projects.id field.
+  `project_id` varchar(255) binary NOT NULL,
+
+  -- Key to config.userAgents property.
+  `useragent_id` varchar(255) NOT NULL default '',
+
+  -- YYYYMMDDHHMMSS timestamp.
+  `updated` binary(14) NOT NULL,
+
+  PRIMARY KEY (`project_id`,`useragent_id`)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Modify the default delimiter for procedures
+DELIMITER //
+
+CREATE PROCEDURE `sp_calculate_project_updated` (
+  IN p_run_id INT,
+  IN p_updated BINARY(14),
+  IN p_useragent_id VARCHAR(255)
+)
+BEGIN
+  -- find project_id for current run
+  SELECT jobs.project_id
+  INTO @project_id
+  FROM runs
+    INNER JOIN jobs ON jobs.id = runs.job_id
+  WHERE runs.id = p_run_id;
+
+  -- update project_updated, set max_updated for current useragent and user
+  -- we are assuming here that the application only sets the updated column to current timestamp
+  -- which always should be the highest value
+  -- the alternative is to run MAX() function to find the actual highest updated value
+  -- decision was made that running MAX() is too resource intensive
+
+  SELECT COUNT(*)
+  INTO @rowcount
+  FROM project_updated
+  WHERE project_id = @project_id
+        AND useragent_id = p_useragent_id;
+
+  IF @rowcount = 0 THEN
+    INSERT project_updated ( project_id, useragent_id, updated )
+      VALUES ( @project_id, p_useragent_id, p_updated );
+  ELSE
+    UPDATE project_updated
+    SET updated = p_updated
+    WHERE project_id = @project_id
+      AND useragent_id = p_useragent_id;
+  END IF;
+END //
+
+CREATE TRIGGER `trg_insert_run_useragent`
+AFTER INSERT ON `run_useragent`
+FOR EACH ROW BEGIN
+  CALL sp_calculate_project_updated (
+    NEW.run_id,
+    NEW.updated,
+    NEW.useragent_id
+  );
+END //
+
+CREATE TRIGGER `trg_update_run_useragent`
+AFTER UPDATE ON `run_useragent`
+FOR EACH ROW BEGIN
+  CALL sp_calculate_project_updated (
+    NEW.run_id,
+    NEW.updated,
+    NEW.useragent_id
+  );
+END //
+
+-- Restore the default delimiter
+DELIMITER ;

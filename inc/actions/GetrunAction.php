@@ -50,30 +50,18 @@ class GetrunAction extends Action {
 			// AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
 
 		$runID = $db->getOne(str_queryf(
-			'SELECT	run_useragent.run_id
+			'SELECT run_useragent.run_id
 			FROM jobs
 				INNER JOIN runs ON jobs.id = runs.job_id
-				INNER JOIN run_useragent  ON runs.id = run_useragent.run_id
-				LEFT OUTER JOIN (
-					/* This gives us a list of users who have run jobs and when they last updated a run */
-					SELECT projects.id,
-						projects.priority,
-						MAX(run_useragent.updated) AS max_updated
-					FROM projects
-						INNER JOIN jobs ON projects.id = jobs.project_id
-						INNER JOIN runs ON jobs.id = runs.job_id
-						INNER JOIN run_useragent ON runs.id = run_useragent.run_id
-					WHERE useragent_id = %s
-					GROUP BY projects.id
-				) next_project ON next_project.id = jobs.project_id
-			WHERE useragent_id = %s
-			AND run_useragent.status = 0
-			ORDER BY next_project.priority,
-				next_project.max_updated,
-				next_project.id,
-				run_useragent.run_id DESC
+				INNER JOIN run_useragent ON runs.id = run_useragent.run_id
+				INNER JOIN projects  ON projects.id = jobs.project_id
+				LEFT OUTER JOIN project_updated ON project_updated.project_id = projects.id AND project_updated.useragent_id = run_useragent.useragent_id
+			WHERE run_useragent.useragent_id = %s
+				AND run_useragent.status = 0
+			ORDER BY projects.priority ASC,
+			    project_updated.updated,
+			    runs.id DESC
 			LIMIT 1;',
-			$browserInfo->getSwarmUaID(),
 			$browserInfo->getSwarmUaID()
 		));
 
