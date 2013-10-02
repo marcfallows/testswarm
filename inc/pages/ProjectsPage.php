@@ -40,8 +40,8 @@ class ProjectsPage extends Page {
 			if ( !$job ) {
 				$html .= '<td>N/A</td>';
 			} else {
-				$html .= '<td class="swarm-status-cell swarm-jobstatus-cell"><div class="swarm-status swarm-status-' . $job['summary'] . '">'
-					. JobPage::getStatusIconHtml( $job['summary'] )
+				$html .= '<td class="swarm-status-cell swarm-jobstatus-cell"><div class="swarm-status swarm-status-' . $job['summary']['primaryStatus'] . '">'
+					. JobPage::getStatusIconHtml( $job['summary']['primaryStatus'] )
 					. html_tag( 'a', array(
 						'href' => $job['info']['viewUrl'],
 						'title' => $job['info']['nameText'],

@@ -89,6 +89,7 @@ class JobPage extends Page {
 		$html .= '<table class="table table-bordered swarm-results"><thead>'
 			. self::getUaHtmlHeader( $data['userAgents'], $isOwner )
 			. '</thead><tbody>'
+			. self::getUaSummaryHtmlRow( $data['uaSummaries'], $data['userAgents'] )
 			. self::getUaRunsHtmlRows( $data['runs'], $data['userAgents'], $isOwner )
 			. '</tbody></table>';
 
@@ -200,6 +201,40 @@ HTML;
 			}
 
 			$html .= ' </th>';
+		}
+
+		$html .= '</tr>';
+		return $html;
+	}
+
+	/**
+	 * Create a table header for user agents.
+	 */
+	public static function getUaSummaryHtmlRow( $uaSummaries, $userAgents ) {
+
+		$html = '<tr>'
+			. html_tag_open( 'td', array(
+				'class' => 'swarm-status-summary-cell swarm-status-summary-label'
+			) )
+			. '</td>';
+
+		foreach ( $userAgents as $uaID => $userAgent ) {
+			$html .= html_tag_open( 'td', array(
+				'class' => 'swarm-status-summary-cell'
+			) );
+
+			$total = $uaSummaries[$uaID]['total'];
+			foreach ( $uaSummaries[$uaID]['counts'] as $status => $count ) {
+
+				$percentOfJob = ( $count / $total ) * 100;
+
+				$html .= html_tag( 'div', array(
+					'class' => 'swarm-status-summary swarm-status-summary-' . $status,
+					'style' => 'width: ' . $percentOfJob . '%'
+				));
+
+			}
+			$html .= ' </td>';
 		}
 
 		$html .= '</tr>';
@@ -358,7 +393,7 @@ HTML;
 			. "</th>\n";
 
 		foreach ( $userAgents as $uaID => $uaData ) {
-			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID] ) ? $job['summaries'][$uaID] : false );
+			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID]['primaryStatus'] ) ? $job['summaries'][$uaID]['primaryStatus'] : false );
 		}
 
 		$html .= '</tr>';

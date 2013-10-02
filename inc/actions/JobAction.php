@@ -69,7 +69,7 @@ class JobAction extends Action {
 		$uaStatuses = array();
 		foreach ( $this->runs as $run ) {
 			foreach ( $run['uaRuns'] as $uaID => $uaRun ) {
-				$uaStatuses[$uaID][] = $uaRun['runStatus'];
+				$uaStatuses[$uaID][] = array('primaryStatus' => $uaRun['runStatus']);
 			}
 		}
 
@@ -260,8 +260,21 @@ class JobAction extends Action {
 		$isNew = true;
 		$strongest = null;
 		$hasIncomplete = false;
+		$total = 0;
 
-		foreach ( $statuses as $status ) {
+		// Enforce the order of the counts by the strengths.
+		foreach($strengths as $strengthKey => $strength){
+			$counts[$strengthKey] = 0;
+		}
+
+		foreach ( $statuses as $statusInfo ) {
+
+			$status = $statusInfo['primaryStatus'];
+
+			$total++;
+
+			$counts[$status]++;
+
 			if ( $status !== 'new' && $isNew ) {
 				$isNew = false;
 			}
@@ -275,12 +288,16 @@ class JobAction extends Action {
 			}
 		}
 
-		return $isNew
-			? 'new'
-			: ( $hasIncomplete
-				? 'progress'
-				: $strongest
-			);
+		return array(
+			'primaryStatus' => $isNew
+				? 'new'
+				: ( $hasIncomplete
+					? 'progress'
+					: $strongest
+				),
+			'total' => $total,
+			'counts' => $counts
+		);
 	}
 
 	/**

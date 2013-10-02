@@ -174,15 +174,19 @@ h2 + .row {
 }
 
 .swarm-status-new,
-.swarm-status-lost {
+.swarm-status-summary-new,
+.swarm-status-lost,
+.swarm-status-summary-lost {
 	background: #E8E8E8;
 }
 .swarm-status-new,
+.swarm-status-summary-new,
 .swarm-status-new a {
 	color: #666;
 }
 
-.swarm-status-progress {
+.swarm-status-progress,
+.swarm-status-summary-progress {
 	background: #EFEBD7;
 }
 
@@ -191,7 +195,8 @@ h2 + .row {
 	color: #877B45;
 }
 
-.swarm-status-passed {
+.swarm-status-passed,
+.swarm-status-summary-passed {
 	background: #DBEFD7;
 }
 .swarm-status-passed,
@@ -200,9 +205,13 @@ h2 + .row {
 }
 
 .swarm-status-timedout,
+.swarm-status-summary-timedout,
 .swarm-status-error,
+.swarm-status-summary-error,
 .swarm-status-heartbeat,
-.swarm-status-failed {
+.swarm-status-summary-heartbeat,
+.swarm-status-failed,
+.swarm-status-summary-failed {
 	background: #EFD7D7;
 }
 
@@ -267,6 +276,15 @@ h2 + .row {
 	animation-duration: 2s;
 	animation-timing-function: linear;
 	animation-iteration-count: infinite;
+}
+
+.table td.swarm-status-summary-cell {
+    padding: 0;
+}
+
+.swarm-status-summary {
+    height: 10px;
+    float: left;
 }
 
 .swarm-item-actions {
