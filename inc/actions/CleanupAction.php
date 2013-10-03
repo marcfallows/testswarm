@@ -68,22 +68,24 @@ class CleanupAction extends Action {
 			}
 		}
 
-		// Suspend user agent runs which have not updated within the outdated threshold.
+		// Suspend user agent runs which have not updated within the auto-suspend threshold.
+		$maxAutoSuspendedAge = time() - $conf->general->autoSuspendAfterTime;
 
-		$suspendedOutdatedRuns = $db->query(str_queryf(
+		$db->query(str_queryf(
 			"UPDATE run_useragent
-			SET
-				status = %u,
+			SET	status = %u,
 				results_id = NULL
 			WHERE run_useragent.status = 0
-			AND   run_useragent.updated < %s;",
+				AND run_useragent.updated < %s;",
 			JobAction::$STATE_SUSPENDED,
-			swarmdb_dateformat( Client::getMaxOutdatedAge( $context ) )
+			swarmdb_dateformat( $maxAutoSuspendedAge )
 		));
+
+		$numAutoSuspendedRunRows = $db->getAffectedRows();
 
 		$this->setData(array(
 			"resetTimedoutRuns" => $resetTimedoutRuns,
-			"suspendedOutdatedRuns" => $suspendedOutdatedRuns,
+			"autoSuspendedRuns" => $numAutoSuspendedRunRows,
 		));
 	}
 }

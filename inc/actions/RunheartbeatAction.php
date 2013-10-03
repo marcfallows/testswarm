@@ -1,13 +1,13 @@
 <?php
 /**
- * "Runner" action
+ * "Runheartbeat" action
  *
  * @author Maciej Borzecki, 2012
  * @since 1.0.0
  * @package TestSwarm
  */
 
-class RunnerAction extends Action {
+class RunheartbeatAction extends Action {
 
 	/**
 	 * @actionMethod GET/POST: Required.
@@ -51,7 +51,7 @@ class RunnerAction extends Action {
 					return;
 				}
 
-				$expected_update = $now + $beatRate;
+				$nextHeartbeat = $now + $beatRate;
 
 				$db->query(str_queryf(
 					"UPDATE runresults
@@ -59,14 +59,14 @@ class RunnerAction extends Action {
 						fail = %u,
 						error = %u,
 						total = %u,
-						expected_update = %s,
+						next_heartbeat = %s,
 						updated = %s
 					WHERE id = %u
 					AND status = 1;",
 					$fail,
 					$error,
 					$total,
-					swarmdb_dateformat( $expected_update ),
+					swarmdb_dateformat( $nextHeartbeat ),
 					swarmdb_dateformat( $now ),
 					$resultsId
 				));
@@ -105,24 +105,20 @@ class RunnerAction extends Action {
 					return;
 				}
 
-				$timestamp = $now - $conf->client->expectedUpdateTimeoutMargin;
+				$maxHeartbeatAge = $now - $conf->client->runHeartbeatTimeMargin;
 
-				$expected_update = $db->getOne(str_queryf(
-					"SELECT expected_update
+				$nextHeartbeat = $db->getNumRows(str_queryf(
+					"SELECT next_heartbeat
 					FROM runresults
-					WHERE id = %u;",
-					$resultsId
+					WHERE id = %u
+						AND next_heartbeat < %s;",
+					$resultsId,
+					swarmdb_dateformat( $maxHeartbeatAge )
+
 				));
 
-				$isTimedout = true;
-
-				if ( $expected_update !== null ) {
-					$expected_update = gmstrtotime( $expected_update );
-					$isTimedout = $expected_update < $timestamp;
-				}
-
 				$result = array(
-					"testTimedout" => $isTimedout ? 'true' : 'false'
+					"testTimedout" => $nextHeartbeat > 0 ? 'true' : 'false'
 				);
 				break;
 		}

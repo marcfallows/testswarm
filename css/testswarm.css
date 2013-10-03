@@ -174,20 +174,16 @@ h2 + .row {
 }
 
 .swarm-status-new,
-.swarm-status-summary-new,
-.swarm-status-lost,
-.swarm-status-summary-lost {
-	background: #E8E8E8;
+.swarm-status-lost {
+	background: #E8E8E8 !important;
 }
 .swarm-status-new,
-.swarm-status-summary-new,
 .swarm-status-new a {
 	color: #666;
 }
 
-.swarm-status-progress,
-.swarm-status-summary-progress {
-	background: #EFEBD7;
+.swarm-status-progress {
+	background: #EFEBD7 !important;
 }
 
 .swarm-status-progress,
@@ -195,9 +191,8 @@ h2 + .row {
 	color: #877B45;
 }
 
-.swarm-status-passed,
-.swarm-status-summary-passed {
-	background: #DBEFD7;
+.swarm-status-passed {
+	background: #DBEFD7 !important;
 }
 .swarm-status-passed,
 .swarm-status-passed a {
@@ -205,14 +200,10 @@ h2 + .row {
 }
 
 .swarm-status-timedout,
-.swarm-status-summary-timedout,
 .swarm-status-error,
-.swarm-status-summary-error,
 .swarm-status-heartbeat,
-.swarm-status-summary-heartbeat,
-.swarm-status-failed,
-.swarm-status-summary-failed {
-	background: #EFD7D7;
+.swarm-status-failed {
+	background: #EFD7D7 !important;
 }
 
 .swarm-status-timedout,
@@ -227,7 +218,7 @@ h2 + .row {
 }
 
 .swarm-status-suspended {
-    background: #ffffff;
+    background: #ffffff !important;
 }
 
 .swarm-status-suspended,
@@ -236,7 +227,7 @@ h2 + .row {
 }
 
 .swarm-status-notscheduled {
-	background: #fff;
+	background: #fff !important;
 }
 
 .swarm-result-date {
@@ -278,13 +269,20 @@ h2 + .row {
 	animation-iteration-count: infinite;
 }
 
-.table td.swarm-status-summary-cell {
-    padding: 0;
+.table .swarm-progress-cell {
+    background: #f5f5f5;
 }
 
-.swarm-status-summary {
-    height: 10px;
-    float: left;
+.swarm-progress {
+    margin: 0;
+}
+
+.swarm-progress .bar {
+    background: auto;
+
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
 }
 
 .swarm-item-actions {

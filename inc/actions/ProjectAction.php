@@ -146,7 +146,6 @@ class ProjectAction extends Action {
 	}
 
 	private function getPaginationData( $dir, $offset, $limit, &$jobRows, $projectID ) {
-		$limitUrl = '';
 		if ( $limit !== $this->defaultLimit ) {
 			$limitUrl = '&limit=' . $limit;
 		}
@@ -163,6 +162,7 @@ class ProjectAction extends Action {
 		} else {
 			$firstRowID = '';
 			$lastRowID = '';
+
 		}
 
 		if ( $dir === 'back' ) {

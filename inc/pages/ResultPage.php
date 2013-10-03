@@ -174,7 +174,7 @@ class ResultPage extends Page {
 					'Client lost connection with the swarm.'
 				);
 
-				// Still busy? Or some unknown status?
+			// Still busy? Or some unknown status?
 			} else {
 				$this->outputMini(
 					'In Progress',

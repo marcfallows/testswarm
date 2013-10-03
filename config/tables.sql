@@ -16,7 +16,7 @@ CREATE TABLE `projects` (
   `site_url` blob,
 
   -- Project priority to decide which job runs first.
-  `priority` int unsigned NOT NULL default 1,
+  `priority` int unsigned NOT NULL,
 
   -- Salted hash of password (see LoginAction::comparePasswords).
   `password` tinyblob NOT NULL,
@@ -224,7 +224,7 @@ CREATE TABLE `runresults` (
   `updated` binary(14) NOT NULL,
 
   -- YYYYMMDDHHMMSS timestamp. update is expected to be before this timestamp.
-  `expected_update` binary(14) NULL,
+  `next_heartbeat` binary(14) NULL,
 
   -- YYYYMMDDHHMMSS timestamp.
   `created` binary(14) NOT NULL

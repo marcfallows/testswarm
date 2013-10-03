@@ -187,12 +187,12 @@
 			error: window.TestSwarm.result.error,
 			total: window.TestSwarm.result.total,
 			beatRate: beatRate,
-			action: 'runner',
+			action: 'runheartbeat',
 			type: 'stepStart'
 		};
 
 		params = extendParams( params );
-		params.resultsId = params.results_id;	// RunnerAction.php requires resultsId parameter rather than resultsId
+		params.resultsId = params.results_id;	// RunheartbeatAction.php requires resultsId parameter rather than resultsId
 		var url = baseUrl + 'api.php?' + objectToQuerystring( params );
 
 		log('step Start ... ' + url);
@@ -219,7 +219,7 @@
 	}
 
 	function submit( params ) {
-		log('Submitting runner results...');
+		log('Submitting run results...');
 
 		notifyServerAboutStepStart();
 		window.TestSwarm.heartbeat();	// we are still alive, trigger heartbeat so test execution won't time out	

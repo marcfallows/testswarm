@@ -214,14 +214,17 @@ HTML;
 
 		$html = '<tr>'
 			. html_tag_open( 'td', array(
-				'class' => 'swarm-status-summary-cell swarm-status-summary-label'
+				'class' => 'swarm-progress-cell'
 			) )
 			. '</td>';
 
 		foreach ( $userAgents as $uaID => $userAgent ) {
 			$html .= html_tag_open( 'td', array(
-				'class' => 'swarm-status-summary-cell'
-			) );
+				'class' => 'swarm-progress-cell'
+			) )
+			. html_tag_open( 'div', array(
+				'class' => 'progress swarm-progress'
+			));
 
 			$total = $uaSummaries[$uaID]['total'];
 			foreach ( $uaSummaries[$uaID]['counts'] as $status => $count ) {
@@ -229,12 +232,14 @@ HTML;
 				$percentOfJob = ( $count / $total ) * 100;
 
 				$html .= html_tag( 'div', array(
-					'class' => 'swarm-status-summary swarm-status-summary-' . $status,
+					'class' => 'bar swarm-status-' . $status,
 					'style' => 'width: ' . $percentOfJob . '%'
 				));
 
 			}
-			$html .= ' </td>';
+
+			$html .= ' </div>'
+				. ' </td>';
 		}
 
 		$html .= '</tr>';
@@ -393,7 +398,7 @@ HTML;
 			. "</th>\n";
 
 		foreach ( $userAgents as $uaID => $uaData ) {
-			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID]['primaryStatus'] ) ? $job['summaries'][$uaID]['primaryStatus'] : false );
+			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID]['status'] ) ? $job['summaries'][$uaID]['status'] : false );
 		}
 
 		$html .= '</tr>';

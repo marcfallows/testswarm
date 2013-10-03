@@ -44,7 +44,9 @@ class GetrunAction extends Action {
 
 		// Get oldest idle (status=0) run for this user agent.
 
-        // BLINKBOX NOTE: We DO want any available client to run the test, so remove this condition:
+        // BLINKBOX NOTE: We DO want any available client to run the test.
+		// There is limited hardware availability with TV devices so we can't afford to restrict a TV from runs.
+		// So remove this condition:
             // Except if it was already ran in this client in the past (client_id=%u), because
         	// in that case it must've failed. We don't want it to run in the same client again.
 			// AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
@@ -86,18 +88,21 @@ class GetrunAction extends Action {
 			if ( $row && $row->run_url && $row->job_name && $row->run_name ) {
 				// Create stub runresults entry
 				$storeToken = sha1( mt_rand() );
+
+				// New run. We expect to get a heartbeat within the runHeartbeatInitialTime.
 				$now = time();
-				$expected_update = $now + $conf->client->expectedUpdateTimeoutMargin;
+				$nextHeartbeat = $now + $conf->client->runHeartbeatInitialTime;
+
 				$isInserted = $db->query(str_queryf(
 					'INSERT INTO runresults
-					(run_id, client_id, status, store_token, updated, created, expected_update)
+					(run_id, client_id, status, store_token, updated, created, next_heartbeat)
 					VALUES(%u, %u, 1, %s, %s, %s, %s);',
 					$runID,
 					$clientID,
 					sha1( $storeToken ),
 					swarmdb_dateformat( SWARM_NOW ),
 					swarmdb_dateformat( SWARM_NOW ),
-					swarmdb_dateformat( $expected_update )
+					swarmdb_dateformat( $nextHeartbeat )
 				));
 				$runresultsId = $db->getInsertId();
 				if ( !$isInserted || !$runresultsId ) {

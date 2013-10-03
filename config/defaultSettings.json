@@ -1,6 +1,7 @@
 {
 	"general": {
-		"timezone": "UTC"
+		"timezone": "UTC",
+		"autoSuspendAfterTime": 172800
 	},
 	"database": {
 		"host": "localhost",
@@ -22,14 +23,14 @@
 		"nonewrunsSleep": 10,
 		"pingTime": 30,
 		"pingTimeMargin": 10,
-		"outdatedTime": 172800,
 		"runTimeout": 180,
 		"saveReqTimeout": 10,
 		"saveRetryMax": 3,
 		"saveRetrySleep": 5,
 		"requireRunToken": false,
 		"refreshControl": 0,
-    "expectedUpdateTimeoutMargin": 20
+		"runHeartbeatInitialTime": 10,
+		"runHeartbeatTimeMargin": 20
 	},
 	"storage": {
 		"cacheDir": "$1/cache"

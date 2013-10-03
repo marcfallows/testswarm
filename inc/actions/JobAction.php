@@ -69,7 +69,7 @@ class JobAction extends Action {
 		$uaStatuses = array();
 		foreach ( $this->runs as $run ) {
 			foreach ( $run['uaRuns'] as $uaID => $uaRun ) {
-				$uaStatuses[$uaID][] = array('primaryStatus' => $uaRun['runStatus']);
+				$uaStatuses[$uaID][] = array('status' => $uaRun['runStatus']);
 			}
 		}
 
@@ -269,7 +269,7 @@ class JobAction extends Action {
 
 		foreach ( $statuses as $statusInfo ) {
 
-			$status = $statusInfo['primaryStatus'];
+			$status = $statusInfo['status'];
 
 			$total++;
 
@@ -289,7 +289,7 @@ class JobAction extends Action {
 		}
 
 		return array(
-			'primaryStatus' => $isNew
+			'status' => $isNew
 				? 'new'
 				: ( $hasIncomplete
 					? 'progress'

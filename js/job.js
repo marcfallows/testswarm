@@ -1,4 +1,4 @@
-/**
+	/**
  * JavaScript file for the "job" page in the browser.
  *
  * @author John Resig, 2008-2011

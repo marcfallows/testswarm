@@ -108,11 +108,11 @@
 
 	function timeoutCheck( runInfo ) {
 		// is test really timed out? check database
-		retrySend( { action: 'runner', resultsId: runInfo.resultsId, type: 'timeoutCheck' }, function () {
+		retrySend( { action: 'runheartbeat', resultsId: runInfo.resultsId, type: 'timeoutCheck' }, function () {
 			log('run.js: timeoutCheck(): retry');
 			timeoutCheck( runInfo );
 		}, function ( data ) {
-			if ( data.runner.testTimedout === 'true' ) {
+			if ( data.runheartbeat.testTimedout === 'true' ) {
 				log('run.js: timeoutCheck(): true');
 				testTimedout( runInfo );
 			} else {

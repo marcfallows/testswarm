@@ -1,8 +1,9 @@
 <?php
 /**
  * "Wipebrowserjob" action
+ * Sourced from "Wipejob" action
  *
- * @author John Resig, 2008-2011
+ * @author Marc Fallows, 2013
  * @since 0.1.0
  * @package TestSwarm
  */

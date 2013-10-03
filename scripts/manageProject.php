@@ -19,7 +19,7 @@ class ManageProjectScript extends MaintenanceScript {
 		$this->registerOption( 'id', 'value', 'ID of project (must be in format: "' . LoginAction::getNameValidationRegex() . '").' );
 		$this->registerOption( 'display-title', 'value', 'Display title (free form text, max: 255 chars)' );
 		$this->registerOption( 'password', 'value', 'Password for this project (omit to enter in interactive mode)' );
-		$this->registerOption( 'priority', 'value', 'Priority for this project (optional, default 1)' );
+		$this->registerOption( 'priority', 'value', 'Priority for this project (optional, default 50)' );
 		$this->registerOption( 'site-url', 'value', 'URL for this project (optional)' );
 	}
 
@@ -48,7 +48,7 @@ class ManageProjectScript extends MaintenanceScript {
 		}
 
 		if ( !$priority ) {
-			$priority = 1;
+			$priority = 50;
 		}
 
 		if ( !$password ) {
@@ -82,13 +82,13 @@ class ManageProjectScript extends MaintenanceScript {
 		}
 
 		$this->out(
-			'Project ' . $displayTitle . ' has been succesfully created!' . PHP_EOL
+			'Project ' . $displayTitle . ' has been successfully created!' . PHP_EOL
 			. 'The following auth token has been generated for this project:' . PHP_EOL
 			. PHP_EOL
 			. "\t" . $data['authToken'] . PHP_EOL
 			. PHP_EOL
 			. 'You will need it to perform actions that require authentication.' . PHP_EOL
-			. 'If you ever loose it, you can generate a new token with the refreshProjectToken.php script.'
+			. 'If you ever lose it, you can generate a new token with the refreshProjectToken.php script.'
 		);
 	}
 
