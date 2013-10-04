@@ -59,8 +59,9 @@ class SaverunAction extends Action {
 		$error = $request->getInt( 'error', 0 );
 		$status = $request->getInt( 'status', 2 );
 		$reportHtml = $request->getVal( 'report_html', '' );
+		$reportJson = $request->getVal( 'report_json', '' );
 
-		if ( !in_array( $status, array( 2, 3 ) ) ) {
+		if ( !in_array( $status, array( ResultAction::$STATE_FINISHED, ResultAction::$STATE_ABORTED, ResultAction::$STATE_HEARTBEAT ) ) ) {
 			$this->setError( 'invalid-input', 'Illegal status to be set from the client side in action=saverun.' );
 			return;
 		}
@@ -93,6 +94,7 @@ class SaverunAction extends Action {
 				fail = %u,
 				error = %u,
 				report_html = %s,
+				report_json = %s,
 				updated = %s
 			WHERE id = %u
 			LIMIT 1;',
@@ -101,6 +103,7 @@ class SaverunAction extends Action {
 			$fail,
 			$error,
 			gzencode( $reportHtml ),
+			gzencode( $reportJson ),
 			swarmdb_dateformat( SWARM_NOW ),
 
 			$resultsID
@@ -111,7 +114,9 @@ class SaverunAction extends Action {
 			return;
 		}
 
-		$isPassed = $total > 0 && $fail === 0 && $error === 0;
+		// BLINKBOX NOTE: we might have few tests where total might be equal to 0 and it should be considered as success
+		// $isPassed = $total > 0 && $fail === 0 && $error === 0;
+		$isPassed = $fail === 0 && $error === 0;
 
 		// Use results_id in the WHERE clause as additional check, just in case
 		// this runresults row is no longer the primary linked one.

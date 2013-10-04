@@ -46,16 +46,17 @@
 	 */
 	function retrySend( query, retry, ok ) {
 		function error( errMsg ) {
-				if ( errorOut > SWARM.conf.client.saveRetryMax ) {
-					cmds.reload();
-				} else {
-					errorOut += 1;
-					errMsg = errMsg ? (' (' + errMsg + ')') : '';
-					msg( 'Error connecting to server' + errMsg + ', retrying...' );
-					setTimeout( retry, SWARM.conf.client.saveRetrySleep * 1000 );
-				}
+			if ( errorOut > SWARM.conf.client.saveRetryMax ) {
+				cmds.reload();
+			} else {
+				errorOut += 1;
+				errMsg = errMsg ? (' (' + errMsg + ')') : '';
+				msg( 'Error connecting to server' + errMsg + ', retrying...' );
+				setTimeout( retry, SWARM.conf.client.saveRetrySleep * 1000 );
+			}
 		}
 
+		// default results submission
 		$.ajax({
 			type: 'POST',
 			url: SWARM.conf.web.contextpath + 'api.php',
@@ -65,6 +66,7 @@
 			dataType: 'json',
 			success: function ( data ) {
 				if ( !data || data.error ) {
+					log( 'run.js: retrySend: ajax: success: incorrect data' );
 					error( data.error.info );
 				} else {
 					errorOut = 0;
@@ -78,6 +80,8 @@
 	}
 
 	function getTests() {
+		hideTimeoutTimer();
+
 		if ( currRunId === undefined ) {
 			log( 'Connected to the swarm.' );
 		}
@@ -102,7 +106,24 @@
 		$( 'iframe' ).remove();
 	}
 
+	function timeoutCheck( runInfo ) {
+		// is test really timed out? check database
+		retrySend( { action: 'runheartbeat', resultsId: runInfo.resultsId, type: 'timeoutCheck' }, function () {
+			log('run.js: timeoutCheck(): retry');
+			timeoutCheck( runInfo );
+		}, function ( data ) {
+			if ( data.runheartbeat.testTimedout === 'true' ) {
+				log('run.js: timeoutCheck(): true');
+				testTimedout( runInfo );
+			} else {
+				setupTestTimeout( runInfo );
+			}
+		});
+	}
+
 	function testTimedout( runInfo ) {
+		log('run.js: testTimedout()');
+
 		cancelTest();
 		retrySend(
 			{
@@ -119,16 +140,34 @@
 				results_store_token: runInfo.resultsStoreToken
 			},
 			function () {
+				log('run.js: testTimedout(): retry');
 				testTimedout( runInfo );
 			},
 			function ( data ) {
 				if ( data.saverun === 'ok' ) {
+					log('run.js: testTimedout(): ok, SWARM.runDone()');
 					SWARM.runDone();
 				} else {
+					log('run.js: testTimedout(): ok, getTests()');
 					getTests();
 				}
 			}
 		);
+	}
+
+	function setupTestTimeout( runInfo ) {
+		testTimeout = setTimeout( function () {
+			timeoutCheck( runInfo );
+		}, SWARM.conf.client.runTimeout );
+	}
+
+	function hideTimeoutTimer() {
+		$( '#timeoutTimer' ).hide();
+	}
+
+	function logTimeoutCountdown(secondsLeft) {
+		$( '#timeoutCountdown' ).html( secondsLeft );
+		$( '#timeoutTimer' ).show();
 	}
 
 	/**
@@ -180,10 +219,7 @@
 
 				$( '#iframes' ).append( iframe );
 
-				// Timeout after a period of time
-				testTimeout = setTimeout( function () {
-					testTimedout( runInfo );
-				}, SWARM.conf.client.runTimeout * 1000 );
+				setupTestTimeout( runInfo );
 
 				return;
 			}
@@ -221,11 +257,14 @@
 	// it can call this from within the frame
 	// as window.parent.SWARM.runDone();
 	SWARM.runDone = function () {
-		cancelTest();
-		runTests({ timeoutMsg: 'Cooling down.' });
+		//cancelTest();
+		//runTests({ timeoutMsg: 'Cooling down.' });
+		log( 'run.js: runDone(): reloading page...' );
+		cmds.reload();
 	};
 
 	function handleMessage(e) {
+		log( 'run.js: handleMessage(e)' );
 		e = e || window.event;
 		retrySend( e.data, function () {
 			handleMessage(e);

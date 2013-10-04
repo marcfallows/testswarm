@@ -117,6 +117,7 @@ class AddjobAction extends Action {
 		// result in incomplete html, screwing up the JobPage).
 		if ( strlen( $jobName ) > 255 ) {
 			$this->setError( "invalid-input", "Job name too long (up to 255 characters)." );
+			return;
 		}
 
 		// Create job

@@ -43,20 +43,28 @@ class GetrunAction extends Action {
 		$client = Client::newFromContext( $this->getContext(), $runToken, $clientID );
 
 		// Get oldest idle (status=0) run for this user agent.
-		// Except if it was already ran in this client in the past (client_id=%u), because
-		// in that case it must've failed. We don't want it to run in the same client again.
+
+        // BLINKBOX NOTE: We DO want any available client to run the test.
+		// There is limited hardware availability with TV devices so we can't afford to restrict a TV from runs.
+		// So remove this condition:
+            // Except if it was already ran in this client in the past (client_id=%u), because
+        	// in that case it must've failed. We don't want it to run in the same client again.
+			// AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
+
 		$runID = $db->getOne(str_queryf(
-			'SELECT
-				run_id
-			FROM
-				run_useragent
-			WHERE useragent_id = %s
-			AND   status = 0
-			AND NOT EXISTS (SELECT 1 FROM runresults WHERE runresults.run_id = run_useragent.run_id AND runresults.client_id = %u)
-			ORDER BY run_id DESC
+			'SELECT run_useragent.run_id
+			FROM jobs
+				INNER JOIN runs ON jobs.id = runs.job_id
+				INNER JOIN run_useragent ON runs.id = run_useragent.run_id
+				INNER JOIN projects  ON projects.id = jobs.project_id
+				LEFT OUTER JOIN project_updated ON project_updated.project_id = projects.id AND project_updated.useragent_id = run_useragent.useragent_id
+			WHERE run_useragent.useragent_id = %s
+				AND run_useragent.status = 0
+			ORDER BY projects.priority ASC,
+			    project_updated.updated,
+			    runs.id DESC
 			LIMIT 1;',
-			$browserInfo->getSwarmUaID(),
-			$clientID
+			$browserInfo->getSwarmUaID()
 		));
 
 		$runInfo = false;
@@ -80,15 +88,21 @@ class GetrunAction extends Action {
 			if ( $row && $row->run_url && $row->job_name && $row->run_name ) {
 				// Create stub runresults entry
 				$storeToken = sha1( mt_rand() );
+
+				// New run. We expect to get a heartbeat within the runHeartbeatInitialTime.
+				$now = time();
+				$nextHeartbeat = $now + $conf->client->runHeartbeatInitialTime;
+
 				$isInserted = $db->query(str_queryf(
 					'INSERT INTO runresults
-					(run_id, client_id, status, store_token, updated, created)
-					VALUES(%u, %u, 1, %s, %s, %s);',
+					(run_id, client_id, status, store_token, updated, created, next_heartbeat)
+					VALUES(%u, %u, 1, %s, %s, %s, %s);',
 					$runID,
 					$clientID,
 					sha1( $storeToken ),
 					swarmdb_dateformat( SWARM_NOW ),
-					swarmdb_dateformat( SWARM_NOW )
+					swarmdb_dateformat( SWARM_NOW ),
+					swarmdb_dateformat( $nextHeartbeat )
 				));
 				$runresultsId = $db->getInsertId();
 				if ( !$isInserted || !$runresultsId ) {
@@ -118,7 +132,7 @@ class GetrunAction extends Action {
 					"url" => $row->run_url,
 					"desc" => $row->job_name . ' ' . $row->run_name,
 					'resultsId' => $runresultsId,
-					'resultsStoreToken' => $storeToken,
+					'resultsStoreToken' => $storeToken
 				);
 			}
 		}

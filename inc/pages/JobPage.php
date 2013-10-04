@@ -52,20 +52,45 @@ class JobPage extends Page {
 
 		if ( $isOwner ) {
 			$html .= '<script>SWARM.jobInfo = ' . json_encode( $data["info"] ) . ';</script>';
-			$action_bar = '<div class="form-actions swarm-item-actions">'
-				. ' <button class="swarm-reset-runs-failed btn btn-info">Reset failed runs</button>'
-				. ' <button class="swarm-reset-runs btn btn-info">Reset all runs</button>'
-				. ' <button class="swarm-delete-job btn btn-danger">Delete job</button>'
-				. '</div>'
-				. '<div class="swarm-wipejob-error alert alert-error" style="display: none;"></div>';
+			$action_bar = ' <div class="form-actions swarm-item-actions">'
+					. ' <div class="pull-right">'
+						. ' <button type="button" data-toggle="modal" data-target="#addbrowserstojobModal" class="btn btn-success">Add browsers</button>'
+						. ' <div class="btn-group">'
+							. ' <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Reset <span class="caret"></span></button>'
+							. ' <ul class="dropdown-menu">'
+								. ' <li><a href="#" class="swarm-reset-runs">All</a></li>'
+								. ' <li><a href="#" class="swarm-reset-runs-failed">Failed</a></li>'
+								. ' <li><a href="#" class="swarm-reset-runs-suspended">Suspended</a></li>'
+							. ' </ul>'
+						. ' </div>'
+						. ' <button class="swarm-suspend-runs btn btn-warning">Suspend job</button>'
+						. ' <button class="swarm-delete-job btn btn-danger">Delete job</button>'
+					. ' </div>'
+				. ' </div>'
+				. ' <div id="addbrowserstojobModal" class="modal hide fade" tabindex="-1" role="dialog">'
+					. ' <div class="modal-header">'
+						. ' <button type="button" class="close" data-dismiss="modal">×</button>'
+						. ' <h3>Add browsers</h3>'
+					. ' </div>'
+					. ' <div class="modal-body">'
+						. $this->getAddbrowserstojobFormHtml()
+					. ' </div>'
+					. ' <div class="modal-footer">'
+						. ' <button class="btn" data-dismiss="modal">Close</button>'
+						. ' <button class="swarm-add-browsers btn btn-primary" data-dismiss="modal">Add</button>'
+					. ' </div>'
+				. ' </div>'
+				. ' <div class="alert alert-error swarm-wipejob-error" style="display: none;"></div>'
+				. ' <div class="alert alert-error swarm-addbrowserstojob-error" style="display: none;"></div>';
 		} else {
 			$action_bar = '';
 		}
 
 		$html .= $action_bar;
 		$html .= '<table class="table table-bordered swarm-results"><thead>'
-			. self::getUaHtmlHeader( $data['userAgents'] )
+			. self::getUaHtmlHeader( $data['userAgents'], $isOwner )
 			. '</thead><tbody>'
+			. self::getUaSummaryHtmlRow( $data['uaSummaries'], $data['userAgents'] )
 			. self::getUaRunsHtmlRows( $data['runs'], $data['userAgents'], $isOwner )
 			. '</tbody></table>';
 
@@ -74,23 +99,148 @@ class JobPage extends Page {
 		return $html;
 	}
 
+	protected function getAddbrowserstojobFormHtml(){
+		$conf = $this->getContext()->getConf();
+		$browserIndex = BrowserInfo::getBrowserIndex();
+
+		$formHtml = <<<HTML
+<form class="form-horizontal swarm-add-browsers-form">
+
+	<fieldset>
+		<legend>Job information</legend>
+
+
+		<div class="control-group">
+			<label class="control-label" for="form-runMax">Run max:</label>
+			<div class="controls">
+				<input type="number" name="runMax" required min="1" max="99" value="2" id="form-runMax" size="5">
+				<p class="help-block">This is the maximum number of times a run is ran in a user agent. If a run passes
+				without failures then it is only ran once. If it does not pass, TestSwarm will re-try the run
+				(up to "Run max" times) for that useragent to avoid error pollution due to time-outs, slow
+				computers or other unrelated conditions that can cause the server to not receive a success report.</p>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>Browsers</legend>
+
+		<p>Choose which groups of user agents this job should be ran in. Some of the groups may
+		overlap each other, TestSwarm will detect and remove duplicate entries in the resulting set.</p>
+
+HTML;
+		foreach ( $conf->browserSets as $browserSet => $browsers ) {
+			$set = htmlspecialchars( $browserSet );
+			$browsersHtml = '';
+			$last = count( $browsers ) -1;
+			foreach ( $browsers as $i => $uaID ) {
+				$uaData = $browserIndex->$uaID;
+				if ( $i === 0 ) {
+					$browsersHtml .= '<br>';
+				} elseif ( $i === $last ) {
+					$browsersHtml .= '<br> and ';
+				} else {
+					$browsersHtml .= ',<br>';
+				}
+				$browsersHtml .= htmlspecialchars( $uaData->displayInfo['title'] );
+			}
+			$formHtml .= <<<HTML
+		<div class="control-group">
+			<label class="checkbox" for="form-browserset-$set">
+				<input type="checkbox" name="browserSets[]" value="$set" id="form-browserset-$set">
+				<strong>$set</strong>: $browsersHtml.
+			</label>
+		</div>
+HTML;
+		}
+
+		$formHtml .= <<<HTML
+	</fieldset>
+</form>
+HTML;
+
+		return $formHtml;
+	}
+
 	/**
 	 * Create a table header for user agents.
 	 */
-	public static function getUaHtmlHeader( $userAgents ) {
+	public static function getUaHtmlHeader( $userAgents, $showButtons = false ) {
+
 		$html = '<tr><th>&nbsp;</th>';
-		foreach ( $userAgents as $userAgent ) {
+		foreach ( $userAgents as $uaID => $userAgent ) {
 			$displayInfo = $userAgent['displayInfo'];
-			$html .= '<th>'
+			$html .= html_tag_open( 'th', array(
+					'data-useragent-id' => $uaID
+				) )
 				. html_tag( 'div', array(
 					'class' => $displayInfo['class'] . ' swarm-icon-small',
-					'title' => $displayInfo['title'],
+					'title' => $displayInfo['title']
 				) )
-				. '<br>'
+				. ' <br>'
 				. html_tag_open( 'span', array(
 					'class' => 'label swarm-browsername',
-				) ) . $displayInfo['labelHtml'] . '</span>'
-				. '</th>';
+				) ) . $displayInfo['labelHtml'] . '</span><br>';
+
+
+			if( $showButtons ){
+				$html .= ' <br>'
+					. html_tag_open( 'div', array(
+						'class' => 'swarm-browsermenu',
+					) )
+						. ' <div class="btn-group btn-block">'
+						. ' <button class="btn btn-block btn-info dropdown-toggle" data-toggle="dropdown"><span class="icon-th-list icon-white"></button>'
+							. ' <ul class="dropdown-menu">'
+								. ' <li><a href="#" class="swarm-reset-browser-runs">Reset All</a></li>'
+								. ' <li><a href="#" class="swarm-reset-browser-runs-failed">Reset Failed</a></li>'
+								. ' <li><a href="#" class="swarm-reset-browser-runs-suspended">Reset Suspended</a></li>'
+								. ' <li><a href="#" class="swarm-suspend-browser-runs">Suspend</a></li>'
+								. ' <li><a href="#" class="swarm-delete-browser-runs">Delete</a></li>'
+							. ' </ul>'
+						. ' </div>'
+					. ' </div>';
+			}
+
+			$html .= ' </th>';
+		}
+
+		$html .= '</tr>';
+		return $html;
+	}
+
+	/**
+	 * Create a table header for user agents.
+	 */
+	public static function getUaSummaryHtmlRow( $uaSummaries, $userAgents ) {
+
+		$html = '<tr>'
+			. html_tag_open( 'td', array(
+				'class' => 'swarm-progress-cell'
+			) )
+			. '</td>';
+
+		foreach ( $userAgents as $uaID => $userAgent ) {
+			$html .= html_tag_open( 'td', array(
+				'class' => 'swarm-progress-cell'
+			) )
+			. html_tag_open( 'div', array(
+				'class' => 'progress swarm-progress'
+			));
+
+			$total = $uaSummaries[$uaID]['total'];
+			foreach ( $uaSummaries[$uaID]['counts'] as $status => $count ) {
+
+				$percentOfJob = ( $count / $total ) * 100;
+
+				$html .= html_tag( 'div', array(
+					'class' => 'bar swarm-status-' . $status,
+					'style' => 'width: ' . $percentOfJob . '%'
+				));
+
+			}
+
+			$html .= ' </div>'
+				. ' </td>';
 		}
 
 		$html .= '</tr>';
@@ -171,9 +321,11 @@ class JobPage extends Page {
 		static $icons = array(
 			"new" => '<i class="icon-time" title="Scheduled, awaiting run."></i>',
 			"progress" => '<i class="icon-repeat swarm-status-progressicon" title="In progress.."></i>',
+			"suspended" => '<i class="icon-minus-sign" title="Suspended"></i>',
 			"passed" => '<i class="icon-ok" title="Passed!"></i>',
 			"failed" => '<i class="icon-remove" title="Completed with failures"></i>',
 			"timedout" => '<i class="icon-flag" title="Maximum execution time exceeded"></i>',
+			"heartbeat" => '<i class="icon-heart" title="Heartbeat caused result submission"></i>',
 			"error" => '<i class="icon-warning-sign" title="Aborted by an error"></i>',
 			"lost" => '<i class="icon-question-sign" title="Client lost connection with the swarm"></i>',
 		);
@@ -207,8 +359,16 @@ class JobPage extends Page {
 				. '</td><td>Completed with failures</td>'
 			. '</tr>'
 			. '<tr><td class="swarm-status swarm-status-timedout">'
-				. self::getStatusIconHtml( "timedout" )
-				. '</td><td>Maximum execution time exceeded</td>'
+			. self::getStatusIconHtml( "timedout" )
+			. '</td><td>Maximum execution time exceeded</td>'
+			. '</tr>'
+			. '<tr><td class="swarm-status swarm-status-heartbeat">'
+			. self::getStatusIconHtml( "heartbeat" )
+			. '</td><td>Heartbeat caused result submission</td>'
+			. '</tr>'
+			. '<tr><td class="swarm-status swarm-status-suspended">'
+				. self::getStatusIconHtml( "suspended" )
+				. '</td><td>Suspended</td>'
 			. '</tr>'
 			. '<tr><td class="swarm-status swarm-status-error">'
 				. self::getStatusIconHtml( "error" )
@@ -239,7 +399,7 @@ class JobPage extends Page {
 			. "</th>\n";
 
 		foreach ( $userAgents as $uaID => $uaData ) {
-			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID] ) ? $job['summaries'][$uaID] : false );
+			$html .= self::getJobStatusHtmlCell( isset( $job['summaries'][$uaID]['status'] ) ? $job['summaries'][$uaID]['status'] : false );
 		}
 
 		$html .= '</tr>';

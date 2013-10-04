@@ -15,6 +15,9 @@ CREATE TABLE `projects` (
   -- (Optional field, can be empty).
   `site_url` blob,
 
+  -- Project priority to decide which job runs first.
+  `priority` int unsigned NOT NULL,
+
   -- Salted hash of password (see LoginAction::comparePasswords).
   `password` tinyblob NOT NULL,
 
@@ -152,6 +155,7 @@ CREATE TABLE `run_useragent` (
   -- 0 = idle (awaiting (re-)run)
   -- 1 = busy (being run by a client)
   -- 2 = done (passed and/or reached max)
+  -- 3 = suspended (suspended by user)
   `status` tinyint unsigned NOT NULL default 0,
 
   -- Key to runresults.id field.
@@ -195,6 +199,7 @@ CREATE TABLE `runresults` (
   -- 2 = finished
   -- 3 = timed-out (maximum execution time exceeded)
   -- 4 = timed-out (client lost, set from CleanupAction)
+  -- 5 = heartbeat
   `status` tinyint unsigned NOT NULL default 0,
 
   -- Total number of tests ran.
@@ -209,6 +214,9 @@ CREATE TABLE `runresults` (
   -- HTML snapshot of the test results page - gzipped.
   `report_html` blob NULL,
 
+  -- JSON snapshot of the test results page - gzipped.
+  `report_json` blob NULL,
+
   -- Hash of random-generated token. To use as authentication to be allowed to
   -- store runresults in this row. This protects SaverunAction from bad
   -- insertions (otherwise the only ID is the auto incrementing ID, which is
@@ -217,6 +225,9 @@ CREATE TABLE `runresults` (
 
   -- YYYYMMDDHHMMSS timestamp.
   `updated` binary(14) NOT NULL,
+
+  -- YYYYMMDDHHMMSS timestamp. update is expected to be before this timestamp.
+  `next_heartbeat` binary(14) NULL,
 
   -- YYYYMMDDHHMMSS timestamp.
   `created` binary(14) NOT NULL
@@ -231,3 +242,83 @@ CREATE INDEX idx_runresults_status_client ON runresults (status, client_id);
 
 -- Usage: ScoresAction.
 CREATE INDEX idx_runresults_client_total ON runresults (client_id, total);
+
+
+-- Project lookup table to see the last updated run by project per useragent.
+-- This allows us to more efficiently query the next run.
+
+CREATE TABLE `project_updated` (
+  -- Key to projects.id field.
+  `project_id` varchar(255) binary NOT NULL,
+
+  -- Key to config.userAgents property.
+  `useragent_id` varchar(255) NOT NULL default '',
+
+  -- YYYYMMDDHHMMSS timestamp.
+  `updated` binary(14) NOT NULL,
+
+  PRIMARY KEY (`project_id`,`useragent_id`)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Modify the default delimiter for procedures
+DELIMITER //
+
+CREATE PROCEDURE `sp_calculate_project_updated` (
+  IN p_run_id INT,
+  IN p_updated BINARY(14),
+  IN p_useragent_id VARCHAR(255)
+)
+BEGIN
+  -- find project_id for current run
+  SELECT jobs.project_id
+  INTO @project_id
+  FROM runs
+    INNER JOIN jobs ON jobs.id = runs.job_id
+  WHERE runs.id = p_run_id;
+
+  -- update project_updated, set max_updated for current useragent and user
+  -- we are assuming here that the application only sets the updated column to current timestamp
+  -- which always should be the highest value
+  -- the alternative is to run MAX() function to find the actual highest updated value
+  -- decision was made that running MAX() is too resource intensive
+
+  SELECT COUNT(*)
+  INTO @rowcount
+  FROM project_updated
+  WHERE project_id = @project_id
+        AND useragent_id = p_useragent_id;
+
+  IF @rowcount = 0 THEN
+    INSERT project_updated ( project_id, useragent_id, updated )
+      VALUES ( @project_id, p_useragent_id, p_updated );
+  ELSE
+    UPDATE project_updated
+    SET updated = p_updated
+    WHERE project_id = @project_id
+      AND useragent_id = p_useragent_id;
+  END IF;
+END //
+
+CREATE TRIGGER `trg_insert_run_useragent`
+AFTER INSERT ON `run_useragent`
+FOR EACH ROW BEGIN
+  CALL sp_calculate_project_updated (
+    NEW.run_id,
+    NEW.updated,
+    NEW.useragent_id
+  );
+END //
+
+CREATE TRIGGER `trg_update_run_useragent`
+AFTER UPDATE ON `run_useragent`
+FOR EACH ROW BEGIN
+  CALL sp_calculate_project_updated (
+    NEW.run_id,
+    NEW.updated,
+    NEW.useragent_id
+  );
+END //
+
+-- Restore the default delimiter
+DELIMITER ;

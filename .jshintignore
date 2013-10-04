@@ -1,3 +1,4 @@
 inc/libs/
 js/jquery.js
 js/bootstrap-dropdown.js
+js/bootstrap-modal.js
