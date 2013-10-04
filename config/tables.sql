@@ -214,6 +214,9 @@ CREATE TABLE `runresults` (
   -- HTML snapshot of the test results page - gzipped.
   `report_html` blob NULL,
 
+  -- JSON snapshot of the test results page - gzipped.
+  `report_json` blob NULL,
+
   -- Hash of random-generated token. To use as authentication to be allowed to
   -- store runresults in this row. This protects SaverunAction from bad
   -- insertions (otherwise the only ID is the auto incrementing ID, which is

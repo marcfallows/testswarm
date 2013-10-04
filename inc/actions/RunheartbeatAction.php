@@ -46,6 +46,8 @@ class RunheartbeatAction extends Action {
 				$fail = $request->getInt( "fail" );
 				$error = $request->getInt( "error" );
 				$total = $request->getInt( "total" );
+				$reportJson = $request->getVal( 'report_json', '' );
+
 				if ( !$beatRate ) {
 					$this->setError( "missing-parameters" );
 					return;
@@ -59,6 +61,7 @@ class RunheartbeatAction extends Action {
 						fail = %u,
 						error = %u,
 						total = %u,
+						report_json = %s,
 						next_heartbeat = %s,
 						updated = %s
 					WHERE id = %u
@@ -66,6 +69,7 @@ class RunheartbeatAction extends Action {
 					$fail,
 					$error,
 					$total,
+					gzencode( $reportJson ),
 					swarmdb_dateformat( $nextHeartbeat ),
 					swarmdb_dateformat( $now ),
 					$resultsId
