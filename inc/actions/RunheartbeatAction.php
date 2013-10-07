@@ -111,7 +111,7 @@ class RunheartbeatAction extends Action {
 
 				$maxHeartbeatAge = $now - $conf->client->runHeartbeatTimeMargin;
 
-				$nextHeartbeat = $db->getNumRows(str_queryf(
+				$nextHeartbeat = $db->getOne(str_queryf(
 					"SELECT next_heartbeat
 					FROM runresults
 					WHERE id = %u
@@ -122,7 +122,7 @@ class RunheartbeatAction extends Action {
 				));
 
 				$result = array(
-					"testTimedout" => $nextHeartbeat > 0 ? 'true' : 'false'
+					"testTimedout" => $nextHeartbeat ? 'true' : 'false'
 				);
 				break;
 		}

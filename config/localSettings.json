@@ -12,9 +12,9 @@
 		"cacheDir": "$1/cache"
 	},
 	"userAgents": {
-		"Chrome29": {
+		"Chrome30": {
 			"browserFamily": "Chrome",
-			"browserMajor": "29"
+			"browserMajor": "30"
 		},
 		"PhantomJS1.9": {
 			"browserFamily": "PhantomJS",
@@ -86,11 +86,11 @@
 	},
 	"browserSets": {
 		"Default": [
-			"Chrome29",
+			"Chrome30",
 			"PhantomJS1.9"
 		],
     	"Chrome": [
-			"Chrome29"
+			"Chrome30"
 		],
     	"PhantomJS": [
 			"PhantomJS1.9"
