@@ -331,7 +331,8 @@ if ( $auth ) {
 		</footer>
 	</div>
 	<script src="<?php echo swarmpath( 'js/jquery.js' ); ?>"></script>
-	<script src="<?php echo swarmpath( 'js/bootstrap-dropdown.js' ); ?>"></script>
+    <script src="<?php echo swarmpath( 'js/bootstrap-dropdown.js' ); ?>"></script>
+    <script src="<?php echo swarmpath( 'js/bootstrap-modal.js' ); ?>"></script>
 	<script src="<?php echo swarmpath( 'js/pretty.js' ); ?>"></script>
 	<script src="<?php echo swarmpath( 'js/testswarm.js' ); ?>"></script><?php
 

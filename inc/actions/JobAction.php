@@ -7,6 +7,9 @@
  * @package TestSwarm
  */
 class JobAction extends Action {
+
+	public static $STATE_SUSPENDED = 3;
+
 	protected $item, $runs, $userAgents;
 
 	/**
@@ -66,7 +69,7 @@ class JobAction extends Action {
 		$uaStatuses = array();
 		foreach ( $this->runs as $run ) {
 			foreach ( $run['uaRuns'] as $uaID => $uaRun ) {
-				$uaStatuses[$uaID][] = $uaRun['runStatus'];
+				$uaStatuses[$uaID][] = array('status' => $uaRun['runStatus']);
 			}
 		}
 
@@ -166,9 +169,15 @@ class JobAction extends Action {
 
 
 					if ( !$runUaRow->results_id ) {
-						$runUaRuns[$runUaRow->useragent_id] = array(
-							'runStatus' => 'new',
-						);
+						if($runUaRow->status == JobAction::$STATE_SUSPENDED) {
+							$runUaRuns[$runUaRow->useragent_id] = array(
+								'runStatus' => 'suspended',
+							);
+						} else {
+							$runUaRuns[$runUaRow->useragent_id] = array(
+								'runStatus' => 'new',
+							);
+						}
 					} else {
 						$runresultsRow = $db->getRow(str_queryf(
 							'SELECT
@@ -252,8 +261,10 @@ class JobAction extends Action {
 			'passed',
 			'new',
 			'progress',
+			'suspended',
 			'lost',
 			'timedout',
+			'heartbeat',
 			'failed',
 			'error', // highest priority
 		));
@@ -261,8 +272,21 @@ class JobAction extends Action {
 		$isNew = true;
 		$strongest = null;
 		$hasIncomplete = false;
+		$total = 0;
 
-		foreach ( $statuses as $status ) {
+		// Enforce the order of the counts by the strengths.
+		foreach($strengths as $strengthKey => $strength){
+			$counts[$strengthKey] = 0;
+		}
+
+		foreach ( $statuses as $statusInfo ) {
+
+			$status = $statusInfo['status'];
+
+			$total++;
+
+			$counts[$status]++;
+
 			if ( $status !== 'new' && $isNew ) {
 				$isNew = false;
 			}
@@ -276,17 +300,21 @@ class JobAction extends Action {
 			}
 		}
 
-		return $isNew
-			? 'new'
-			: ( $hasIncomplete
-				? 'progress'
-				: $strongest
-			);
+		return array(
+			'status' => $isNew
+				? 'new'
+				: ( $hasIncomplete
+					? 'progress'
+					: $strongest
+				),
+			'total' => $total,
+			'counts' => $counts
+		);
 	}
 
 	/**
 	 * @param $row object: Database row from runresults.
-	 * @return string: One of 'progress', 'passed', 'failed', 'timedout', 'error', or 'lost'
+	 * @return string: One of 'progress', 'passed', 'failed', 'timedout', 'error', 'heartbeat', or 'lost'
 	 */
 	public static function getRunresultsStatus( $row ) {
 		$status = (int)$row->status;
@@ -294,15 +322,23 @@ class JobAction extends Action {
 			return 'progress';
 		}
 		if ( $status === ResultAction::$STATE_FINISHED ) {
+			// BLINKBOX NOTE: we might have few tests where total might be equal to 0 and it should be considered as success
+			if ( intval( $row->error ) === 0 && intval( $row->fail ) === 0 ) {
+				return 'passed';
+			}
+
 			// A total of 0 tests ran is also considered an error
 			if ( $row->error > 0 || intval( $row->total ) === 0 ) {
 				return 'error';
 			}
-			// Passed or failed
-			return $row->fail > 0 ? 'failed' : 'passed';
+
+			return 'failed';
 		}
 		if ( $status === ResultAction::$STATE_ABORTED ) {
 			return 'timedout';
+		}
+		if ( $status === ResultAction::$STATE_HEARTBEAT) {
+			return 'heartbeat';
 		}
 		if ( $status === ResultAction::$STATE_LOST ) {
 			return 'lost';

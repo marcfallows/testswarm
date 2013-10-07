@@ -73,7 +73,8 @@ $swarmAutoLoadClasses = array(
 	'TestSwarmContext' => 'inc/TestSwarm.php',
 	'WebRequest' => 'inc/WebRequest.php',
 	# Actions
-	'AddjobAction' => 'inc/actions/AddjobAction.php',
+    'AddjobAction' => 'inc/actions/AddjobAction.php',
+    'AddbrowserstojobAction' => 'inc/actions/AddbrowserstojobAction.php',
 	'CleanupAction' => 'inc/actions/CleanupAction.php',
 	'ClientAction' => 'inc/actions/ClientAction.php',
 	'ClientsAction' => 'inc/actions/ClientsAction.php',
@@ -86,9 +87,11 @@ $swarmAutoLoadClasses = array(
 	'ProjectAction' => 'inc/actions/ProjectAction.php',
 	'ProjectsAction' => 'inc/actions/ProjectsAction.php',
 	'ResultAction' => 'inc/actions/ResultAction.php',
+	'RunheartbeatAction' => 'inc/actions/RunheartbeatAction.php',
 	'SaverunAction' => 'inc/actions/SaverunAction.php',
 	'SwarmstateAction' => 'inc/actions/SwarmstateAction.php',
 	'WipejobAction' => 'inc/actions/WipejobAction.php',
+	'WipebrowserjobAction' => 'inc/actions/WipebrowserjobAction.php',
 	'WiperunAction' => 'inc/actions/WiperunAction.php',
 	# Pages
 	'AddjobPage' => 'inc/pages/AddjobPage.php',

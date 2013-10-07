@@ -1,13 +1,14 @@
 <?php
 /**
- * "Wipejob" action
+ * "Wipebrowserjob" action
+ * Sourced from "Wipejob" action
  *
- * @author John Resig, 2008-2011
+ * @author Marc Fallows, 2013
  * @since 0.1.0
  * @package TestSwarm
  */
 
-class WipejobAction extends Action {
+class WipebrowserjobAction extends Action {
 
 	/**
 	 * @actionMethod POST: Required.
@@ -20,14 +21,15 @@ class WipejobAction extends Action {
 		$request = $this->getContext()->getRequest();
 
 		$jobID = $request->getInt( 'job_id' );
+		$useragentID = $request->getVal( "useragent_id" );
 		$wipeType = $request->getVal( 'type' );
 
-		if ( !$jobID || !$wipeType ) {
+		if ( !$jobID || !$useragentID || !$wipeType ) {
 			$this->setError( 'missing-parameters' );
 			return;
 		}
 
-		if ( !in_array( $wipeType, array( 'delete', 'reset', 'resetsuspended', 'suspend' ) ) ) {
+		if ( !in_array( $wipeType, array( 'delete', 'reset', 'resetsuspended', 'resetfailed', 'suspend' ) ) ) {
 			$this->setError( 'invalid-input', 'Invalid wipeType' );
 			return;
 		}
@@ -63,8 +65,10 @@ class WipejobAction extends Action {
 					$db->query(str_queryf(
 						'DELETE
 						FROM run_useragent
-						WHERE run_id = %u;',
-						$runRow->id
+						WHERE run_id = %u
+							AND useragent_id = %s;',
+						$runRow->id,
+						$useragentID
 					));
 				} elseif ( $wipeType === 'reset' ) {
 					$db->query(str_queryf(
@@ -74,9 +78,11 @@ class WipejobAction extends Action {
 							completed = 0,
 							results_id = NULL,
 							updated = %s
-						WHERE run_id = %u;',
+						WHERE run_id = %u
+							AND useragent_id = %s;',
 						swarmdb_dateformat( SWARM_NOW ),
-						$runRow->id
+						$runRow->id,
+						$useragentID
 					));
 				} elseif ( $wipeType === 'resetsuspended' ) {
 					$db->query(str_queryf(
@@ -87,10 +93,12 @@ class WipejobAction extends Action {
 							results_id = NULL,
 							updated = %s
 						WHERE run_id = %u
-							AND status = %u;',
+							AND status = %u
+							AND useragent_id = %s;',
 						swarmdb_dateformat( SWARM_NOW ),
 						$runRow->id,
-						JobAction::$STATE_SUSPENDED
+						JobAction::$STATE_SUSPENDED,
+						$useragentID
 					));
 				} elseif ( $wipeType === 'suspend' ) {
 					$db->query(str_queryf(
@@ -99,32 +107,15 @@ class WipejobAction extends Action {
 							status = %u,
 							updated = %s
 						WHERE run_id = %u
-							AND status = 0;',
+							AND status = 0
+							AND useragent_id = %s;',
 						JobAction::$STATE_SUSPENDED,
 						swarmdb_dateformat( SWARM_NOW ),
-						$runRow->id
+						$runRow->id,
+						$useragentID
 					));
 				}
 			}
-		}
-
-		// This should be outside the if for $runRows, because jobs
-		// can sometimes be created without any runs (by accident).
-		// Those should be deletable as well, thus this has to be outside the loop.
-		// Also, no need to do this in a loop, just delete them all in one query.
-		if ( $wipeType === 'delete' ) {
-			$db->query(str_queryf(
-				'DELETE
-				FROM runs
-				WHERE job_id = %u;',
-				$jobID
-			));
-			$db->query(str_queryf(
-				'DELETE
-				FROM jobs
-				WHERE id = %u;',
-				$jobID
-			));
 		}
 
 		$this->setData( array(

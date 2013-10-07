@@ -96,6 +96,11 @@ class WebRequest {
 		return isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] == 'POST';
 	}
 
+	/** @return bool */
+	public function wasGetted() {
+		return isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] == 'GET';
+	}
+
 	public function getSessionData( $key, $default = null ) {
 		if ( !isset( $_SESSION[$key] ) ) {
 			return $default;
