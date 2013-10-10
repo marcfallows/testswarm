@@ -55,6 +55,10 @@ h2 + .row {
 	text-align: right;
 }
 
+.swarm-toollinks a {
+   padding-left: 15px;
+}
+
 .well-swarm-icon {
 	position: relative;
 	padding: 9px;

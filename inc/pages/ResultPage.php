@@ -17,9 +17,10 @@ class ResultPage extends Page {
 
 		$resultsID = $request->getInt( 'item' );
 		$isRaw = $request->getBool( 'raw' );
+		$format = $request->getVal( 'format', 'html' );
 
 		if ( $resultsID && $isRaw ) {
-			$this->serveRawResults( $resultsID );
+			$this->serveRawResults( $resultsID, $format );
 			exit;
 		}
 
@@ -114,10 +115,20 @@ class ResultPage extends Page {
 					'action' => 'result',
 					'item' => $data['info']['id'],
 					'raw' => '',
+					'format' => 'json',
 				)),
 				'target' => '_blank',
 				'class' => 'swarm-popuplink',
-			), 'Open in new window' )
+			), 'Open JSON report in a new window' )
+			. html_tag( 'a', array(
+				'href' => swarmpath( 'index.php' ) . '?' . http_build_query(array(
+					'action' => 'result',
+					'item' => $data['info']['id'],
+					'raw' => '',
+				)),
+				'target' => '_blank',
+				'class' => 'swarm-popuplink',
+			), 'Open HTML report in a new window' )
 			. '</p>'
 			. html_tag( 'iframe', array(
 				'src' => swarmpath( 'index.php' ) . '?' . http_build_query(array(
@@ -133,7 +144,7 @@ class ResultPage extends Page {
 		return $html;
 	}
 
-	protected function serveRawResults( $resultsID ) {
+	protected function serveRawResults( $resultsID, $format ) {
 		$db = $this->getContext()->getDB();
 
 		$this->setRobots( 'noindex,nofollow' );
@@ -145,25 +156,30 @@ class ResultPage extends Page {
 		$row = $db->getRow(str_queryf(
 			'SELECT
 				status,
-				report_html
+				report_html,
+				report_json
 			FROM runresults
 			WHERE id = %u;',
 			$resultsID
 		));
 
-		header( 'Content-Type: text/html; charset=utf-8' );
+		$reportField = 'report_' . $format;
+
+		header( 'Content-Type: text/' . $format . '; charset=utf-8' );
 		if ( $row ) {
 			$status = intval( $row->status );
+			$report = $row->{$reportField};
+
 			// If it finished or was aborted, there should be
-			// a (at least partial) html report.
+			// a (at least partial) report.
 			if ( $status === ResultAction::$STATE_FINISHED || $status === ResultAction::$STATE_ABORTED || $status === ResultAction::$STATE_HEARTBEAT ) {
-				if ( $row->report_html !== '' && $row->report_html !== null ) {
+				if ( $report !== '' && $report !== null ) {
 					header( 'Content-Encoding: gzip' );
-					echo $row->report_html;
+					echo $report;
 				} else {
 					$this->outputMini(
 						'No Content',
-						'Client saved results but did not attach an HTML report.'
+						'Client saved results but did not attach a report in ' . strtoupper($format) . ' format.'
 					);
 				}
 
@@ -186,7 +202,7 @@ class ResultPage extends Page {
 			$this->outputMini( 'Not Found' );
 		}
 
-		// This is a raw HTML response, the Page should not build.
+		// This is a raw response, the Page should not build.
 		exit;
 	}
 }

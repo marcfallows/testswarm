@@ -257,10 +257,8 @@
 	// it can call this from within the frame
 	// as window.parent.SWARM.runDone();
 	SWARM.runDone = function () {
-		//cancelTest();
-		//runTests({ timeoutMsg: 'Cooling down.' });
-		log( 'run.js: runDone(): reloading page...' );
-		cmds.reload();
+		cancelTest();
+		runTests({ timeoutMsg: 'Cooling down.' });
 	};
 
 	function handleMessage(e) {

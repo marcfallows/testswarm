@@ -45,10 +45,12 @@ class RunPage extends Page {
 				. '</div>'
 			. '</div>'
 			. '<div class="well">'
+				. '<div id="iframes"></div>'
+			. '</div>'
+			. '<div class="well">'
 				. '<h3>History</h3>'
 				. '<ul id="history"></ul>'
-			. '</div>'
-			. '<div id="iframes"></div>';
+			. '</div>';
 
 		return $html;
 	}
