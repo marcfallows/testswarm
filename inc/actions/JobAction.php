@@ -207,6 +207,7 @@ class JobAction extends Action {
 
 							'runStatus' => self::getRunresultsStatus( $runresultsRow ),
 							// Add link to runresults
+							'runResultsID' => $runUaRow->results_id,
 							'runResultsUrl' => swarmpath( 'result/' . $runUaRow->results_id ),
 							'runResultsLabel' =>
 								$runresultsRow->status != ResultAction::$STATE_FINISHED

@@ -44,7 +44,8 @@ class ResultAction extends Action {
 				client_id,
 				status,
 				updated,
-				created
+				created,
+				report_json
 			FROM runresults
 			WHERE id = %u;',
 			$item
@@ -112,6 +113,8 @@ class ResultAction extends Action {
 			'uaRaw' => $clientRow->useragent,
 			'viewUrl' => swarmpath( 'client/' . $clientRow->id ),
 		);
+
+		$data['report'] = json_decode(gzdecode($row->report_json));
 
 		// If still busy or if the client was lost, then the last update time is irrelevant
 		// Alternatively this could test if $row->updated == $row->created, which would effectively
