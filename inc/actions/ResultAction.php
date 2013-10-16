@@ -17,7 +17,7 @@ class ResultAction extends Action {
 	// Run by the client was aborted by the client.
 	// Either the test (inject.js) lost pulse internally
 	// and submitted a partial result, or the test runner (run.js)
-	// aborted the test after conf.client.runTimeout.
+	// aborted the test.
 	public static $STATE_ABORTED = 3;
 
 	// Client did not submit results, and from CleanAction it
@@ -37,6 +37,8 @@ class ResultAction extends Action {
 		$request = $context->getRequest();
 
 		$item = $request->getInt( 'item' );
+		$includeReport = $request->getBool( 'report' );
+
 		$row = $db->getRow(str_queryf(
 			'SELECT
 				id,
@@ -44,7 +46,8 @@ class ResultAction extends Action {
 				client_id,
 				status,
 				updated,
-				created
+				created,
+				report_json
 			FROM runresults
 			WHERE id = %u;',
 			$item
@@ -112,6 +115,10 @@ class ResultAction extends Action {
 			'uaRaw' => $clientRow->useragent,
 			'viewUrl' => swarmpath( 'client/' . $clientRow->id ),
 		);
+
+		if ( $includeReport ) {
+			$data['report'] = json_decode(gzdecode($row->report_json));
+		}
 
 		// If still busy or if the client was lost, then the last update time is irrelevant
 		// Alternatively this could test if $row->updated == $row->created, which would effectively

@@ -42,6 +42,7 @@ class RunPage extends Page {
 				. '<div class="span7">'
 					. '<h2>' . htmlspecialchars( $client->getClientRow()->name ) . '</h2>'
 					. '<p><strong>Status:</strong> <span id="msg"></span></p>'
+					. '<p><strong>Refresh:</strong> Press Enter / OK to refresh</p>'
 				. '</div>'
 			. '</div>'
 			. '<div class="well">'

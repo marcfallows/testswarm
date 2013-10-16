@@ -503,6 +503,10 @@ h2 + .row {
     background-image: url(../img/os-linux.png);
 }
 
+.swarm-os-freebsd::after {
+    background-image: url(../img/os-freebsd.png);
+}
+
 .swarm-icon-small {
 	max-width: 48px;
 	max-height: 48px;

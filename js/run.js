@@ -7,7 +7,12 @@
  * @package TestSwarm
  */
 (function ( $, SWARM, undefined ) {
-	var currRunId, currRunUrl, testTimeout, pauseTimer, cmds, errorOut;
+	var currRunId, currRunUrl, testHeartbeatInterval, confUpdateTimeout, pauseTimer, sleepTimer, cmds, errorOut;
+
+	var refreshCodes = [
+		13, 	// Enter/OK on most devices
+		29443	// Enter/OK for Samsung devices
+	];
 
 	function msg( htmlMsg ) {
 		$( '#msg' ).html( htmlMsg );
@@ -34,10 +39,50 @@
 
 	errorOut = 0;
 	cmds = {
+		sleep: function () {
+
+			if(sleepTimer)
+			{
+				return;
+			}
+
+			cancelTest();
+			if ( confUpdateTimeout ) {
+				clearTimeout( confUpdateTimeout );
+				confUpdateTimeout = 0;
+			}
+
+			var sleep_msg, sleepTimeLeft
+
+			sleep_msg = 'Server unavailable, sleeping.';
+			sleepTimeLeft = SWARM.conf.client.serverNotRespondingSleep;
+			msg(sleep_msg);
+
+			sleepTimer = setTimeout(function sleepLeftTimer() {
+				msg(sleep_msg + ' Waking up in ' + sleepTimeLeft + ' seconds.' );
+				if ( sleepTimeLeft >= 1 ) {
+					sleepTimeLeft -= 1;
+					sleepTimer = setTimeout( sleepLeftTimer, 1000 );
+				} else {
+					sleepTimeLeft -= 1;
+					resetAfterSleep();
+				}
+			}, 1000);
+		},
 		reload: function () {
 			window.location.reload();
 		}
 	};
+
+	function resetAfterSleep(){
+		errorOut = 0
+		if ( sleepTimer ) {
+			clearTimeout( sleepTimer );
+			sleepTimer = 0;
+		}
+		getTests();
+		confUpdate();
+	}
 
 	/**
 	 * @param query String|Object: $.ajax "data" option, converted with $.param.
@@ -47,7 +92,7 @@
 	function retrySend( query, retry, ok ) {
 		function error( errMsg ) {
 			if ( errorOut > SWARM.conf.client.saveRetryMax ) {
-				cmds.reload();
+				cmds.sleep();
 			} else {
 				errorOut += 1;
 				errMsg = errMsg ? (' (' + errMsg + ')') : '';
@@ -98,9 +143,9 @@
 	}
 
 	function cancelTest() {
-		if ( testTimeout ) {
-			clearTimeout( testTimeout );
-			testTimeout = 0;
+		if ( testHeartbeatInterval ) {
+			clearInterval( testHeartbeatInterval );
+			testHeartbeatInterval = 0;
 		}
 
 		$( 'iframe' ).remove();
@@ -115,8 +160,6 @@
 			if ( data.runheartbeat.testTimedout === 'true' ) {
 				log('run.js: timeoutCheck(): true');
 				testTimedout( runInfo );
-			} else {
-				setupTestTimeout( runInfo );
 			}
 		});
 	}
@@ -155,10 +198,10 @@
 		);
 	}
 
-	function setupTestTimeout( runInfo ) {
-		testTimeout = setTimeout( function () {
+	function setupTestHeartbeat( runInfo ) {
+		testHeartbeatInterval = setInterval( function () {
 			timeoutCheck( runInfo );
-		}, SWARM.conf.client.runTimeout );
+		}, SWARM.conf.client.runHeartbeatRate * 1000 );
 	}
 
 	function hideTimeoutTimer() {
@@ -219,7 +262,7 @@
 
 				$( '#iframes' ).append( iframe );
 
-				setupTestTimeout( runInfo );
+				setupTestHeartbeat( runInfo );
 
 				return;
 			}
@@ -286,14 +329,14 @@
 			if ( data.ping && data.ping.confUpdate ) {
 				// Refresh control
 				if ( SWARM.conf.client.refreshControl < data.ping.confUpdate.client.refreshControl ) {
-					cmds.reload();
+					cmds.sleep();
 					return;
 				}
 
 				$.extend( SWARM.conf, data.ping.confUpdate );
 			}
 		}).always( function () {
-			setTimeout( confUpdate, SWARM.conf.client.pingTime * 1000 );
+			confUpdateTimeout = setTimeout( confUpdate, SWARM.conf.client.pingTime * 1000 );
 		});
 	}
 
@@ -310,6 +353,12 @@
 	$( function () {
 		getTests();
 		confUpdate();
+
+		$(document).keyup(function(event){
+			if (refreshCodes.indexOf(event.which) >= 0 ) {
+				cmds.reload();
+			}
+		});
 	});
 
 }( jQuery, SWARM ) );
