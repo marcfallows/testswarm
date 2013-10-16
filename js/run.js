@@ -54,7 +54,7 @@
 			msg(sleep_msg);
 
 			sleepTimer = setTimeout(function sleepLeftTimer() {
-				msg(sleep_msg + ' Waking in ' + sleepTimeLeft + ' seconds.' );
+				msg(sleep_msg + ' Waking up in ' + sleepTimeLeft + ' seconds.' );
 				if ( sleepTimeLeft >= 1 ) {
 					sleepTimeLeft -= 1;
 					sleepTimer = setTimeout( sleepLeftTimer, 1000 );
