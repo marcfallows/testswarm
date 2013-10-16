@@ -37,6 +37,8 @@ class ResultAction extends Action {
 		$request = $context->getRequest();
 
 		$item = $request->getInt( 'item' );
+		$includeReport = $request->getBool( 'report' );
+
 		$row = $db->getRow(str_queryf(
 			'SELECT
 				id,
@@ -114,7 +116,9 @@ class ResultAction extends Action {
 			'viewUrl' => swarmpath( 'client/' . $clientRow->id ),
 		);
 
-		$data['report'] = json_decode(gzdecode($row->report_json));
+		if ( $includeReport ) {
+			$data['report'] = json_decode(gzdecode($row->report_json));
+		}
 
 		// If still busy or if the client was lost, then the last update time is irrelevant
 		// Alternatively this could test if $row->updated == $row->created, which would effectively
