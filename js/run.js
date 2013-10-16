@@ -9,6 +9,11 @@
 (function ( $, SWARM, undefined ) {
 	var currRunId, currRunUrl, testHeartbeatInterval, confUpdateTimeout, pauseTimer, sleepTimer, cmds, errorOut;
 
+	var refreshCodes = [
+		13, 	// Enter/OK on most devices
+		29443	// Enter/OK for Samsung devices
+	];
+
 	function msg( htmlMsg ) {
 		$( '#msg' ).html( htmlMsg );
 	}
@@ -348,6 +353,12 @@
 	$( function () {
 		getTests();
 		confUpdate();
+
+		$(document).keyup(function(event){
+			if (refreshCodes.indexOf(event.which) >= 0 ) {
+				cmds.reload();
+			}
+		});
 	});
 
 }( jQuery, SWARM ) );
