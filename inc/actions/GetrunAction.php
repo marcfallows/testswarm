@@ -68,6 +68,7 @@ class GetrunAction extends Action {
 		));
 
 		$runInfo = false;
+		$runresultsId = 0;
 
 		// A run was found for the current user_agent
 		if ( $runID ) {
@@ -134,6 +135,49 @@ class GetrunAction extends Action {
 					'resultsId' => $runresultsId,
 					'resultsStoreToken' => $storeToken
 				);
+			}
+		}
+
+		// Clear old runs for client. If they are getting a run it means they aren't running other tests.
+		$rows = $db->getRows(str_queryf(
+			"SELECT
+				runresults.id as id
+			FROM
+				runresults
+			INNER JOIN clients ON runresults.client_id = clients.id
+			WHERE runresults.status = 1
+			AND   clients.id = %u
+			AND   runresults.id <> %u;",
+			$clientID,
+			$runresultsId
+		));
+
+		if ($rows) {
+			foreach ($rows as $row) {
+				// Reset the run
+				$ret = $db->query(str_queryf(
+					"UPDATE run_useragent
+					SET
+						status = 0,
+						results_id = NULL
+					WHERE results_id = %u;",
+					$row->id
+				));
+
+				// If the previous UPDATE query failed for whatever
+				// reason, don't do the below query as that will lead
+				// to data corruption (results with state LOST must never
+				// be referenced from run_useragent.results_id).
+				if ( $ret ) {
+					// Update status of the result
+					$db->query(str_queryf(
+						"UPDATE runresults
+						SET status = %s
+						WHERE id = %u;",
+						ResultAction::$STATE_LOST,
+						$row->id
+					));
+				}
 			}
 		}
 
