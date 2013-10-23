@@ -177,8 +177,7 @@ h2 + .row {
 	cursor: pointer;
 }
 
-.swarm-status-new,
-.swarm-status-lost {
+.swarm-status-new {
 	background: #E8E8E8 !important;
 }
 .swarm-status-new,
@@ -206,7 +205,8 @@ h2 + .row {
 .swarm-status-timedout,
 .swarm-status-error,
 .swarm-status-heartbeat,
-.swarm-status-failed {
+.swarm-status-failed,
+.swarm-status-lost {
 	background: #EFD7D7 !important;
 }
 

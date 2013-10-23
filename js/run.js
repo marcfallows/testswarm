@@ -174,8 +174,8 @@
 				fail: 0,
 				error: 0,
 				total: 0,
-				status: 3, // ResultAction::STATE_ABORTED
-				report_html: 'Test Timed Out.',
+				status: 5, // ResultAction::STATE_HEARTBEAT
+				report_html: 'Test Timed Out From Heartbeat.',
 				run_id: currRunId,
 				client_id: SWARM.client_id,
 				run_token: SWARM.run_token,

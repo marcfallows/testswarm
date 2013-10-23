@@ -114,9 +114,10 @@ class SaverunAction extends Action {
 			return;
 		}
 
-		// BLINKBOX NOTE: we might have few tests where total might be equal to 0 and it should be considered as success
+		// BLINKBOX NOTE: we might have few tests where total might be equal to 0
+		// and it should be considered as success if it is finished.
 		// $isPassed = $total > 0 && $fail === 0 && $error === 0;
-		$isPassed = $fail === 0 && $error === 0;
+		$isPassed = $fail === 0 && $error === 0 && $status == ResultAction::$STATE_FINISHED;
 
 		// Use results_id in the WHERE clause as additional check, just in case
 		// this runresults row is no longer the primary linked one.
