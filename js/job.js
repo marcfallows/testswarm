@@ -150,7 +150,7 @@ jQuery(function ( $ ) {
 			var $th = $( this ).closest( 'th' );
 			var $userAgentData = $th.data( 'useragentId' );
 
-			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"], td[data-run-status="heartbeat"]' ).filter( $('td[data-useragent-id="' + $userAgentData + '"]') );
+			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"], td[data-run-status="heartbeat"], td[data-run-status="lost"]' ).filter( $('td[data-useragent-id="' + $userAgentData + '"]') );
 
 			if ( !$els.length || !window.confirm( 'Are you sure you want to reset the failed runs for this browser?' ) ) {
 				return;
@@ -163,7 +163,7 @@ jQuery(function ( $ ) {
 		$( '.swarm-reset-runs-failed' ).on( 'click', function () {
 
 
-			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"], td[data-run-status="heartbeat"]' );
+			var $els = $( 'td[data-run-status="failed"], td[data-run-status="error"], td[data-run-status="timedout"], td[data-run-status="heartbeat"], td[data-run-status="lost"]' );
 			if ( !$els.length || !window.confirm( 'Are you sure you want to reset all failed runs?' ) ) {
 				return;
 			}

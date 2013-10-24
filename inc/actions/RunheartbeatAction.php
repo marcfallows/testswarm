@@ -111,18 +111,20 @@ class RunheartbeatAction extends Action {
 
 				$maxHeartbeatAge = $now - $conf->client->runHeartbeatTimeMargin;
 
-				$nextHeartbeat = $db->getOne(str_queryf(
+				$withinMaxHeartbeatAge = $db->getOne(str_queryf(
 					"SELECT next_heartbeat
 					FROM runresults
 					WHERE id = %u
-						AND next_heartbeat < %s;",
+						AND status = %u
+						AND next_heartbeat >= %s;",
 					$resultsId,
+					ResultAction::$STATE_BUSY,
 					swarmdb_dateformat( $maxHeartbeatAge )
 
 				));
 
 				$result = array(
-					"testTimedout" => $nextHeartbeat ? 'true' : 'false'
+					"testTimedout" => $withinMaxHeartbeatAge ? 'false' : 'true'
 				);
 				break;
 		}
