@@ -20,6 +20,7 @@ class ProjectPage extends Page {
 	protected function initContent() {
 
 		$this->setTitle( "Project" );
+		$this->bodyScripts[] = swarmpath( "js/tooltip.js" );
 
 		$html = "";
 

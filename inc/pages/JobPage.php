@@ -25,6 +25,7 @@ class JobPage extends Page {
 		$this->setTitle( "Job status" );
 		$this->setRobots( "noindex,nofollow" );
 		$this->bodyScripts[] = swarmpath( "js/job.js" );
+		$this->bodyScripts[] = swarmpath( "js/tooltip.js" );
 
 		$error = $this->getAction()->getError();
 		$data = $this->getAction()->getData();
@@ -260,7 +261,7 @@ HTML;
 		$html = '';
 
 		foreach ( $runs as $run ) {
-			$html .= '<tr><th><a href="' . htmlspecialchars( $run['info']['url'] ) . '">'
+			$html .= '<tr><th class="swarm-label"><a href="' . htmlspecialchars( $run['info']['url'] ) . '" data-toggle="tooltip" title="' . htmlspecialchars( $run['info']['name'] ) . '">'
 				. $run['info']['name'] . '</a></th>';
 
 			// Looping over $userAgents instead of $run["uaRuns"],
@@ -392,8 +393,8 @@ HTML;
 	 * @param Array $userAgents List of uaData objects.
 	 */
 	public static function getJobHtmlRow( $job, $userAgents ) {
-		$html = '<tr><th>'
-			. '<a href="' . htmlspecialchars( $job['info']['viewUrl'] ) . '">' . htmlspecialchars( $job['info']['nameText'] ) . '</a>'
+		$html = '<tr><th class="swarm-label">'
+			. '<a href="' . htmlspecialchars( $job['info']['viewUrl'] ) . '" data-toggle="tooltip" title="' . htmlspecialchars( $job['info']['nameText'] ) . '">' . htmlspecialchars( $job['info']['nameText'] ) . '</a>'
 			. ' '
 			. self::getPrettyDateHtml( $job['info'], 'created', array( 'class' => 'swarm-result-date' ) )
 			. "</th>\n";
