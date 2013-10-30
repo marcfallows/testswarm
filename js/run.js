@@ -133,8 +133,8 @@
 
 		currRunId = 0;
 		currRunUrl = false;
-        isCurrRunDone = false;
-        timeoutHeartbeatInProgress = false;
+		isCurrRunDone = false;
+		timeoutHeartbeatInProgress = false;
 
 		msg( 'Querying for tests to run...' );
 		retrySend( {
@@ -155,20 +155,18 @@
 
 	function timeoutHeartbeatCheck( runInfo ) {
 
-        if (isCurrRunDone){
-            return;
-        }
+		if (isCurrRunDone){
+			return;
+		}
 
-        log('run.js: timeoutHeartbeatCheck()');
-
-        timeoutHeartbeatInProgress = true;
+		timeoutHeartbeatInProgress = true;
 
 		// is test really timed out? check database
 		retrySend( { action: 'runheartbeat', resultsId: runInfo.resultsId, type: 'timeoutCheck' }, function () {
 			log('run.js: timeoutHeartbeatCheck(): retry');
 			timeoutHeartbeatCheck( runInfo );
 		}, function ( data ) {
-            timeoutHeartbeatInProgress = false;
+			timeoutHeartbeatInProgress = false;
 
 			if ( data.runheartbeat.testTimedout === 'true' ) {
 				log('run.js: timeoutHeartbeatCheck(): true');
@@ -178,11 +176,11 @@
 	}
 
 	function testTimedout( runInfo ) {
-        if (isCurrRunDone){
-            return;
-        }
+		if (isCurrRunDone){
+			return;
+		}
 
-        log('run.js: testTimedout()');
+		log('run.js: testTimedout()');
 
 		cancelTest();
 		retrySend(
@@ -217,9 +215,9 @@
 
 	function setupTimeoutHeartbeat( runInfo ) {
 		timeoutHeartbeatInterval = setInterval( function () {
-            if (!timeoutHeartbeatInProgress) {
-                timeoutHeartbeatCheck( runInfo );
-            }
+			if (!timeoutHeartbeatInProgress) {
+				timeoutHeartbeatCheck( runInfo );
+			}
 		}, SWARM.conf.client.runHeartbeatRate * 1000 );
 	}
 
@@ -326,22 +324,22 @@
 
 	function handleMessage(e) {
 
-        if (isCurrRunDone){
-            return;
-        }
-        
-		e = e || window.event;
-        isCurrRunDone = true;
+		if (isCurrRunDone){
+			return;
+		}
 
-        sendMessage(e);
+		e = e || window.event;
+		isCurrRunDone = true;
+
+		sendMessage(e);
 	}
 
-    function sendMessage(obj){
-        log( 'run.js: sendMessage()' );
-        retrySend( obj.data, function () {
-            sendMessage(obj);
-        }, SWARM.runDone );
-    }
+	function sendMessage(obj){
+		log( 'run.js: sendMessage()' );
+		retrySend( obj.data, function () {
+			sendMessage(obj);
+		}, SWARM.runDone );
+	}
 
 	function confUpdate() {
 		$.ajax({
