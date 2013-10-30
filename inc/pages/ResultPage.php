@@ -165,7 +165,16 @@ class ResultPage extends Page {
 
 		$reportField = 'report_' . $format;
 
-		header( 'Content-Type: text/' . $format . '; charset=utf-8' );
+		switch ( $format ) {
+			case 'json':
+				header( 'Content-Type: application/json; charset=utf-8' );
+				break;
+
+			case 'html':
+				header( 'Content-Type: text/html; charset=utf-8' );
+				break;
+		}
+
 		if ( $row ) {
 			$status = intval( $row->status );
 			$report = $row->{$reportField};

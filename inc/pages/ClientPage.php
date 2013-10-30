@@ -34,6 +34,7 @@ class ClientPage extends Page {
 
 		$info = $data['info'];
 		$displayInfo = $info['uaData']['displayInfo'];
+		$deviceInfo = $info['device']['info'];
 
 		$this->setSubTitle( '#' . $info['id'] );
 
@@ -45,9 +46,16 @@ class ClientPage extends Page {
 			. '<div class="span10">'
 			. '<table class="table table-striped">'
 			. '<tbody>'
-			. '<tr><th>Name</th><td>'
-				. html_tag( 'a', array( 'href' => $info['viewUrl'] ), $info['name'] )
-			. '</td></tr>'
+			. ( $deviceInfo
+				?
+					'<tr><th>Device</th><td>'
+					. html_tag( 'a', array( 'href' => $deviceInfo['viewUrl'] ), $deviceInfo['name'] )
+					. '</td></tr>'
+				:
+					'<tr><th>Name</th><td>'
+					. html_tag( 'a', array( 'href' => $info['viewUrl'] ), $info['name'] )
+					. '</td></tr>'
+			)
 			. '<tr><th>UA ID</th><td>'
 				. '<code>' . htmlspecialchars( $info['uaID'] ) . '</code>'
 			. '<tr><th>User-Agent</th><td>'
@@ -61,8 +69,15 @@ class ClientPage extends Page {
 			. '</td></tr>'
 			. '<tr><th>Last ping</th><td>'
 				. self::getPrettyDateHtml( $info, 'pinged' )
-			. '</td></tr>'
-			. '</tbody></table>'
+			. '</td></tr>';
+
+		foreach ( $info['deviceDetails'] as $detailKey => $detail ){
+			$html .= '<tr><th>' . snakeCaseToTitle($detailKey) . '</th><td>'
+				. $detail
+				. '</td></tr>';
+		}
+
+		$html .= '</tbody></table>'
 			. '</div>'
 			. '</div>';
 

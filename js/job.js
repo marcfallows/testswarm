@@ -10,7 +10,7 @@ jQuery(function ( $ ) {
 		$wipejobErr = $( '.swarm-wipejob-error' ),
 		$addbrowserstojobErr = $( '.swarm-addbrowserstojob-error' ),
 		$targetTable = $( 'table.swarm-results' ),
-		refreshTableTimout, indicatorText, $indicator;
+		refreshTableTimeout, indicatorText, $indicator;
 
 	indicatorText = document.createTextNode( 'updating' );
 	$indicator = $( '<span class="btn pull-right disabled"> <i class="icon-refresh"></i></span>' )
@@ -19,8 +19,8 @@ jQuery(function ( $ ) {
 
 	function indicateAction( label ) {
 		// Make sure any scheduled action is dequeued, we're doing something now.
-		if ( refreshTableTimout ) {
-			clearTimeout( refreshTableTimout );
+		if ( refreshTableTimeout ) {
+			clearTimeout( refreshTableTimeout );
 		}
 		// $.text() is a getter
 		// $.fn.text() does empty/append, which means the reference is no meaningless
@@ -41,7 +41,7 @@ jQuery(function ( $ ) {
 		var $browserMenuDropdown = $(".swarm-browsermenu .dropdown-menu");
 
 		if( $browserMenuDropdown.is(':visible') ) {
-			refreshTableTimout = setTimeout( refreshTable, updateInterval );
+			refreshTableTimeout = setTimeout( refreshTable, updateInterval );
 			return;
 		}
 
@@ -57,14 +57,14 @@ jQuery(function ( $ ) {
 				}
 			})
 			.complete( function () {
-				// Wether done or failed: Clean up and schedule next update
+				// Whether done or failed: Clean up and schedule next update
 				actionComplete();
-				refreshTableTimout = setTimeout( refreshTable, updateInterval );
+				refreshTableTimeout = setTimeout( refreshTable, updateInterval );
 			});
 	}
 
 	// Schedule first update
-	refreshTableTimout = setTimeout( refreshTable, updateInterval );
+	refreshTableTimeout = setTimeout( refreshTable, updateInterval );
 
 	function wipejobFail( data ) {
 		$wipejobErr.hide().text( data.error && data.error.info || 'Action failed.' ).slideDown();

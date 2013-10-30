@@ -87,7 +87,7 @@ h2 + .row {
 }
 
 .swarm-browsermenu {
-    text-align: left;
+	text-align: left;
 }
 
 /**
@@ -132,12 +132,12 @@ h2 + .row {
 }
 
 .tooltip {
-    white-space: normal;
+	white-space: normal;
 }
 
 .tooltip-inner {
-    max-width: 500px;
-    overflow: hidden;
+	max-width: 500px;
+	overflow: hidden;
 }
 
 
@@ -153,11 +153,23 @@ h2 + .row {
  */
 
 .table .swarm-label a {
-    max-width: 400px;
-    display: inline-block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
+	max-width: 400px;
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+.table .swarm-device-log-job-name,
+.table .swarm-device-log-run-name {
+	max-width: 300px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.table .device-name-edit-icon {
+	cursor: pointer;
 }
 
 .table .swarm-status-cell {
@@ -213,6 +225,7 @@ h2 + .row {
 	color: #877B45;
 }
 
+.swarm-status-client-active,
 .swarm-status-passed {
 	background: #DBEFD7 !important;
 }
@@ -221,6 +234,7 @@ h2 + .row {
 	color: #508745;
 }
 
+.swarm-status-client-inactive,
 .swarm-status-timedout,
 .swarm-status-error,
 .swarm-status-heartbeat,
@@ -241,12 +255,12 @@ h2 + .row {
 }
 
 .swarm-status-suspended {
-    background: #ffffff !important;
+	background: #ffffff !important;
 }
 
 .swarm-status-suspended,
 .swarm-status-suspended a {
-    color: #666;
+	color: #666;
 }
 
 .swarm-status-notscheduled {
@@ -293,30 +307,113 @@ h2 + .row {
 }
 
 .table .swarm-progress-cell {
-    background: #f5f5f5;
+	background: #f5f5f5;
 }
 
 .swarm-progress {
-    margin: 0;
+	margin: 0;
 }
 
 .swarm-progress .bar {
-    background: auto;
+	background: auto;
 
-    -webkit-box-shadow: none !important;
-    -moz-box-shadow: none !important;
-    box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.table.swarm-devices {
+    border-bottom: 1px solid #dddddd;
+}
+
+.table .swarm-device-health {
+    padding: 0;
+}
+
+span.swarm-device-run-health {
+    border: 1px solid #dddddd;
+    border-top: 0;
+	display: block;
+	float: left;
+    margin: 0 0 -1px -1px;
+}
+
+td.swarm-device-run-health {
+	min-width: 20%;
+}
+
+.swarm-device-run-health:last-child {
+	border-right: 1px solid #dddddd;
+}
+
+.swarm-device-run-client {
+	display: block;
+    margin: -1px;
+	padding: 0;
+	background: #ffffff;
+    border: 1px solid #dddddd;
+}
+
+.swarm-device-run-client-colour {
+	display: block;
+	height: 4px;
+    opacity: 0.5;
+}
+
+.swarm-device-run-health-good {
+	background: #DBEFD7 !important;
+}
+
+.swarm-device-run-health-ok {
+	background: #EFEBD7 !important;
+}
+
+.swarm-device-run-health-bad {
+	background: #EFD7D7 !important;
+}
+
+.swarm-device-run-health-severe {
+	background: #aaaaaa !important;
+}
+
+.swarm-device-run-health .well-swarm-icon {
+	background: none;
+	border: none;
+	margin: 0;
+	padding: 0;
+	min-height: 0;
+	-webkit-border-radius: 0;
+	   -moz-border-radius: 0;
+			border-radius: 0;
+	-webkit-box-shadow: none;
+	   -moz-box-shadow: none;
+			box-shadow: none;
+}
+
+.swarm-device-run-health .well-swarm-icon .swarm-icon {
+	margin: 0;
+	margin: 2px;
+	width: 13px;
+	height: 28px;
+}
+
+.swarm-device-run-health .swarm-browsername {
+	display: none;
+}
+
+.swarm-device-run-health .swarm-os::after {
+	display: none;
 }
 
 .swarm-item-actions {
 }
 
 .swarm-page-run .hero-unit {
-    display: none;
+	display: none;
 }
 
 .swarm-page-run .run-status {
-    padding: 60px 0 0 0;
+	padding: 60px 0 0 0;
 }
 
 .swarm-page-footer {
@@ -449,32 +546,32 @@ h2 + .row {
 }
 
 .swarm-browser-phantomjs {
-    background-image: url(../img/browser-phantomjs.png);
+	background-image: url(../img/browser-phantomjs.png);
 }
 
 .swarm-browser-samsung {
-    background-image: url(../img/browser-samsung.png);
+	background-image: url(../img/browser-samsung.png);
 }
 
 .swarm-browser-toshiba {
-    background-image: url(../img/browser-toshiba.png);
+	background-image: url(../img/browser-toshiba.png);
 }
 
 .swarm-browser-lg {
-    background-image: url(../img/browser-lg.png);
+	background-image: url(../img/browser-lg.png);
 }
 
 .swarm-browser-philips {
-    background-image: url(../img/browser-philips.png);
+	background-image: url(../img/browser-philips.png);
 }
 
 .swarm-browser-technika_avtrex,
 .swarm-browser-technika_mstar {
-    background-image: url(../img/browser-technika.png);
+	background-image: url(../img/browser-technika.png);
 }
 
 .swarm-browser-panasonic {
-    background-image: url(../img/browser-panasonic.png);
+	background-image: url(../img/browser-panasonic.png);
 }
 
 .swarm-device-ipad {
@@ -509,7 +606,7 @@ h2 + .row {
 }
 
 .swarm-os-mac_os_x::after {
-    background-image: url(../img/os-macosx.png);
+	background-image: url(../img/os-macosx.png);
 }
 
 .swarm-os-windows::after,
@@ -527,11 +624,11 @@ h2 + .row {
 }
 
 .swarm-os-linux::after {
-    background-image: url(../img/os-linux.png);
+	background-image: url(../img/os-linux.png);
 }
 
 .swarm-os-freebsd::after {
-    background-image: url(../img/os-freebsd.png);
+	background-image: url(../img/os-freebsd.png);
 }
 
 .swarm-icon-small {

@@ -105,6 +105,34 @@ class Client {
 		));
 	}
 
+	public function linkToDevice(Device $device) {
+		$db = $this->context->getDB();
+		$request = $this->context->getRequest();
+
+		$clientSpecificDeviceDetails = $request->getArray('details');
+		$clientSpecificDeviceDetailsJson = json_encode($clientSpecificDeviceDetails);
+
+		$db->query(str_queryf(
+			'UPDATE clients
+			SET
+				device_id = %u,
+				details_json = %s,
+				device_index = (
+					SELECT IF( last_client.next_device_index, last_client.next_device_index, 0 ) FROM (
+						SELECT MAX(device_index) + 1 AS next_device_index
+						FROM clients
+						WHERE device_id = %u
+					) AS last_client
+				)
+			WHERE id = %u
+			LIMIT 1;',
+			$device->getDeviceRow()->id,
+			gzencode( $clientSpecificDeviceDetailsJson ),
+			$device->getDeviceRow()->id,
+			$this->clientRow->id
+		));
+	}
+
 	public function getClientRow() {
 		return $this->clientRow;
 	}
