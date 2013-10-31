@@ -155,7 +155,7 @@ class SaverunAction extends Action {
 					run_useragent
 				SET
 					completed = completed + 1,
-					status = IF(completed + 1 < max, 0, 2),
+					status = IF(completed < max, 0, 2),
 					updated = %s
 				WHERE run_id = %u
 				AND   useragent_id = %s

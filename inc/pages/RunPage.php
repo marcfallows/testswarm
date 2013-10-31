@@ -15,6 +15,7 @@ class RunPage extends Page {
 		$request = $this->getContext()->getRequest();
 
 		$this->setTitle( 'Test runner' );
+		$this->setClassName( 'run' );
 
 		$runToken = null;
 
@@ -35,7 +36,7 @@ class RunPage extends Page {
 			. '</script>';
 
 		$html .=
-			'<div class="row">'
+			'<div class="row run-status">'
 				. '<div class="span2">'
 					. $browserInfo->getIconHtml()
 				. '</div>'

@@ -131,6 +131,16 @@ h2 + .row {
 	white-space: nowrap;
 }
 
+.tooltip {
+    white-space: normal;
+}
+
+.tooltip-inner {
+    max-width: 500px;
+    overflow: hidden;
+}
+
+
 /**
  * Some of Bootstrap's table styling
  * have a lot of weight on their selector,
@@ -141,6 +151,15 @@ h2 + .row {
  * or the table cell. In that case though, we need to transfer the inner padding
  * from the bootstrap class (.table) cell to ours.
  */
+
+.table .swarm-label a {
+    max-width: 400px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
 .table .swarm-status-cell {
 	padding: 0;
 }
@@ -290,6 +309,14 @@ h2 + .row {
 }
 
 .swarm-item-actions {
+}
+
+.swarm-page-run .hero-unit {
+    display: none;
+}
+
+.swarm-page-run .run-status {
+    padding: 60px 0 0 0;
 }
 
 .swarm-page-footer {

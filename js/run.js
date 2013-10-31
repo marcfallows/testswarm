@@ -7,7 +7,7 @@
  * @package TestSwarm
  */
 (function ( $, SWARM, undefined ) {
-	var currRunId, currRunUrl, testHeartbeatInterval, confUpdateTimeout, pauseTimer, sleepTimer, cmds, errorOut;
+	var currRunId, currRunUrl, timeoutHeartbeatInterval, timeoutHeartbeatInProgress, confUpdateTimeout, pauseTimer, isCurrRunDone, sleepTimer, cmds, errorOut;
 
 	var refreshCodes = [
 		13, 	// Enter/OK on most devices
@@ -133,6 +133,8 @@
 
 		currRunId = 0;
 		currRunUrl = false;
+		isCurrRunDone = false;
+		timeoutHeartbeatInProgress = false;
 
 		msg( 'Querying for tests to run...' );
 		retrySend( {
@@ -143,28 +145,41 @@
 	}
 
 	function cancelTest() {
-		if ( testHeartbeatInterval ) {
-			clearInterval( testHeartbeatInterval );
-			testHeartbeatInterval = 0;
+		if ( timeoutHeartbeatInterval ) {
+			clearInterval( timeoutHeartbeatInterval );
+			timeoutHeartbeatInterval = 0;
 		}
 
 		$( 'iframe' ).remove();
 	}
 
-	function timeoutCheck( runInfo ) {
+	function timeoutHeartbeatCheck( runInfo ) {
+
+		if (isCurrRunDone){
+			return;
+		}
+
+		timeoutHeartbeatInProgress = true;
+
 		// is test really timed out? check database
 		retrySend( { action: 'runheartbeat', resultsId: runInfo.resultsId, type: 'timeoutCheck' }, function () {
-			log('run.js: timeoutCheck(): retry');
-			timeoutCheck( runInfo );
+			log('run.js: timeoutHeartbeatCheck(): retry');
+			timeoutHeartbeatCheck( runInfo );
 		}, function ( data ) {
+			timeoutHeartbeatInProgress = false;
+
 			if ( data.runheartbeat.testTimedout === 'true' ) {
-				log('run.js: timeoutCheck(): true');
+				log('run.js: timeoutHeartbeatCheck(): true');
 				testTimedout( runInfo );
 			}
 		});
 	}
 
 	function testTimedout( runInfo ) {
+		if (isCurrRunDone){
+			return;
+		}
+
 		log('run.js: testTimedout()');
 
 		cancelTest();
@@ -198,9 +213,11 @@
 		);
 	}
 
-	function setupTestHeartbeat( runInfo ) {
-		testHeartbeatInterval = setInterval( function () {
-			timeoutCheck( runInfo );
+	function setupTimeoutHeartbeat( runInfo ) {
+		timeoutHeartbeatInterval = setInterval( function () {
+			if (!timeoutHeartbeatInProgress) {
+				timeoutHeartbeatCheck( runInfo );
+			}
 		}, SWARM.conf.client.runHeartbeatRate * 1000 );
 	}
 
@@ -262,7 +279,7 @@
 
 				$( '#iframes' ).append( iframe );
 
-				setupTestHeartbeat( runInfo );
+				setupTimeoutHeartbeat( runInfo );
 
 				return;
 			}
@@ -300,15 +317,27 @@
 	// it can call this from within the frame
 	// as window.parent.SWARM.runDone();
 	SWARM.runDone = function () {
+		isCurrRunDone = true;
 		cancelTest();
 		runTests({ timeoutMsg: 'Cooling down.' });
 	};
 
 	function handleMessage(e) {
-		log( 'run.js: handleMessage(e)' );
+
+		if (isCurrRunDone){
+			return;
+		}
+
 		e = e || window.event;
-		retrySend( e.data, function () {
-			handleMessage(e);
+		isCurrRunDone = true;
+
+		sendMessage(e);
+	}
+
+	function sendMessage(obj){
+		log( 'run.js: sendMessage()' );
+		retrySend( obj.data, function () {
+			sendMessage(obj);
 		}, SWARM.runDone );
 	}
 

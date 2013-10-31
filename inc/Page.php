@@ -41,6 +41,7 @@ abstract class Page {
 	protected $rawDisplayTitle; // optional, fallsback to title + subtitle
 	protected $subTitle;
 	protected $content;
+	protected $className = 'default';
 
 	protected $frameOptions = 'DENY';
 
@@ -75,6 +76,21 @@ abstract class Page {
 	 */
 	public function getTitle() {
 		return $this->title;
+	}
+
+	/**
+	 * Set the class name (to be used in the <body>
+	 * @param $className string: Class name
+	 */
+	public function setClassName( $className ) {
+		$this->className = $className;
+	}
+
+	/**
+	 * @return string: The class name
+	 */
+	public function getClassName() {
+		return $this->className;
 	}
 
 	/**
@@ -265,7 +281,7 @@ abstract class Page {
 		echo "\t" . html_tag( 'script', array( 'src' => $headScript ) ) . "\n";
 	}
 ?></head>
-<body>
+<body class="swarm-page swarm-page-<?php echo $this->getClassName() ?>">
 	<div class="navbar navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">
@@ -333,6 +349,7 @@ if ( $auth ) {
 	<script src="<?php echo swarmpath( 'js/jquery.js' ); ?>"></script>
     <script src="<?php echo swarmpath( 'js/bootstrap-dropdown.js' ); ?>"></script>
     <script src="<?php echo swarmpath( 'js/bootstrap-modal.js' ); ?>"></script>
+	<script src="<?php echo swarmpath( 'js/bootstrap-tooltip.js' ); ?>"></script>
 	<script src="<?php echo swarmpath( 'js/pretty.js' ); ?>"></script>
 	<script src="<?php echo swarmpath( 'js/testswarm.js' ); ?>"></script><?php
 
