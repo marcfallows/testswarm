@@ -85,7 +85,8 @@ class ClientsAction extends Action {
 				name,
 				useragent,
 				updated,
-				created
+				created,
+				device_id
 			FROM
 				clients
 			WHERE updated >= %s
@@ -98,7 +99,23 @@ class ClientsAction extends Action {
 			foreach ( $rows as $row ) {
 				$bi = BrowserInfo::newFromContext( $this->getContext(), $row->useragent );
 
-				$resultRow = $db->getRow(str_queryf(
+                $deviceRow = $db->getRow(str_queryf(
+                    'SELECT id FROM devices WHERE id = %u ORDER BY id DESC LIMIT 1;',
+                    $row->device_id
+                ));
+                if ( !$deviceRow ) {
+                    $device = false;
+                } else {
+                    $deviceAction = DeviceAction::newFromContext( $this->getContext()->createDerivedRequestContext(
+                        array(
+                            'item' => $deviceRow->id
+                        )
+                    ) );
+                    $deviceAction->doAction();
+                    $device = $deviceAction->getData();
+                }
+
+                $resultRow = $db->getRow(str_queryf(
 					'SELECT
 						id,
 						run_id,
@@ -121,7 +138,9 @@ class ClientsAction extends Action {
 					'uaID' => $bi->getSwarmUaID(),
 					'uaRaw' => $bi->getRawUA(),
 					'uaData' => $bi->getUaData(),
-					'viewUrl' => swarmpath( "client/{$row->id}" ),
+                    'device' => $device,
+                    'viewUrl' => swarmpath( "client/{$row->id}" ),
+                    'viewNameUrl' => swarmpath( "clients/{$row->name}" ),
 					'lastResult' => !$resultRow ? null : array(
 						'id' => intval( $resultRow->id ),
 						'viewUrl' => swarmpath( "result/{$resultRow->id}" ),

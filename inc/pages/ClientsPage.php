@@ -108,9 +108,9 @@ class ClientsPage extends Page {
 
 		$html = '<table class="table table-striped">'
 		 . '<thead><tr>'
-		 . '<th class="swarm-toggle" data-toggle-query="' . htmlspecialchars( json_encode( $navigationSort['name']['toggleQuery'] ) ) . '">User ' . $navigationSort['name']['arrowHtml'] . '</b></th>'
+		 . '<th class="swarm-toggle" data-toggle-query="' . htmlspecialchars( json_encode( $navigationSort['name']['toggleQuery'] ) ) . '">User ' . $navigationSort['name']['arrowHtml'] . '</th>'
 		 . '<th>Clients</th>'
-		 . '<th class="span4 swarm-toggle" data-toggle-query="' . htmlspecialchars( json_encode( $navigationSort['updated']['toggleQuery'] ) ) . '">Last ping ' . $navigationSort['updated']['arrowHtml'] . '</b></th>'
+		 . '<th class="span4 swarm-toggle" data-toggle-query="' . htmlspecialchars( json_encode( $navigationSort['updated']['toggleQuery'] ) ) . '">Last ping ' . $navigationSort['updated']['arrowHtml'] . '</th>'
 		 . '</tr></thead>'
 		 . '<tbody>';
 
@@ -148,10 +148,22 @@ class ClientsPage extends Page {
 		$html = '<div class="row">';
 		foreach ( $data['clients'] as $client ) {
 			$displayInfo = $client['uaData']['displayInfo'];
+			$deviceInfo = $client['device']['info'];
+
 			$html .=
 				'<div class="span4" style="position: relative;"><div class="well clearfix">'
 				. '<div style="position: absolute; left: -20px; top: -25px;">' . BrowserInfo::buildIconHtml( $displayInfo, array( 'wrap' => false ) ) . '</div>'
 				. '<div style="margin-left: 40px"><table class="table table-condensed"><thead>'
+				. ( $deviceInfo
+					?
+						'<tr><th>Device</th><td>'
+						. html_tag( 'a', array( 'href' => $deviceInfo['viewUrl'] ), $deviceInfo['name'] )
+						. '</td></tr>'
+					:
+						'<tr><th>Name</th><td>'
+						. html_tag( 'a', array( 'href' => $client['viewNameUrl'] ), $client['name'] )
+						. '</td></tr>'
+				)
 				. '<tr><th>Last ping</th><td>' . self::getPrettyDateHtml( $client, 'pinged' ) . '</td></tr>'
 				. '<tr><th>Run</th>' . (
 					!$client['lastResult']

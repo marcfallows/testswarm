@@ -36,6 +36,30 @@ CREATE TABLE `projects` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `devices`
+-- Insertions and updates handled by the Device class.
+--
+
+CREATE TABLE `devices` (
+  `id` int unsigned NOT NULL PRIMARY KEY AUTO_INCREMENT,
+
+  -- Unique key to identify device, such as a serial number.
+  `device_key` varchar(255) binary NOT NULL UNIQUE,
+
+  -- Freeform device name.
+  `name` varchar(255) binary NOT NULL,
+
+  -- Type of device (STB, TV, Dekstop, etc)
+  `device_type` varchar(20) NOT NULL default '',
+
+  -- Model often associated with TV Devices (ie. "UE46 ES8000U" on Samsung)
+  `model` varchar(100) NOT NULL default ''
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `clients`
 -- Insertions and updates handled by the Client class.
 --
@@ -46,6 +70,12 @@ CREATE TABLE `clients` (
   -- Freeform client name.
   `name` varchar(255) binary NOT NULL,
 
+  -- Key to devices.id field.
+  `device_id` int unsigned NULL,
+
+  -- The index of a device. Increments for each new client of a device.
+  `device_index` int unsigned NULL,
+
   -- Key to config.userAgents property.
   `useragent_id` varchar(255) NOT NULL,
 
@@ -54,6 +84,9 @@ CREATE TABLE `clients` (
 
   -- Raw IP string as extractred by WebRequest::getIP
   `ip` varbinary(40) NOT NULL default '',
+
+  -- JSON of additional client/device details - gzipped.
+  `details_json` blob NULL,
 
   -- YYYYMMDDHHMMSS timestamp.
   `updated` binary(14) NOT NULL,
@@ -71,6 +104,9 @@ CREATE INDEX idx_clients_updated ON clients (updated);
 
 -- Usage: ClientAction, ScoresAction, BrowserInfo and Client.
 CREATE INDEX idx_clients_name_ua_created ON clients (name, useragent_id, created);
+
+-- Usage: DeviceAction
+CREATE INDEX idx_clients_deviceid ON clients (device_id);
 
 -- --------------------------------------------------------
 

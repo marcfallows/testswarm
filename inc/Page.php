@@ -253,7 +253,7 @@ abstract class Page {
 	}
 
 	$subTitleSuffix = $this->getSubTitle() ? ": {$this->getSubTitle()}" : "";
-	$htmlTitle = $this->getTitle() . $subTitleSuffix . ' - ' . $context->getConf()->web->title;
+	$htmlTitle = strip_tags( $this->getTitle() . $subTitleSuffix . ' - ' . $context->getConf()->web->title );
 	$displayTitleHtml = $this->getDisplayTitleHtml();
 ?>
 	<title><?php echo htmlentities( $htmlTitle ); ?></title>
@@ -308,6 +308,7 @@ foreach ( $projects as $project ) {
 ?>
 						</ul>
 					</li>
+					<?php echo $this->getPageLink( 'devices', 'Devices' ); ?>
 					<?php echo $this->getPageLink( 'clients', 'Clients' ); ?>
 					<?php echo $this->getPageLink( 'info', 'Info' ); ?>
 				</ul>

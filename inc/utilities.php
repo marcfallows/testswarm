@@ -269,3 +269,7 @@
 
 		return $prefix . $rel;
 	}
+
+	function snakeCaseToTitle($s){
+		return ucfirst(str_replace('_', ' ', $s));
+	}

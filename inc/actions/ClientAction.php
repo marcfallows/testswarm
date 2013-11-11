@@ -30,7 +30,9 @@ class ClientAction extends Action {
 				name,
 				useragent,
 				updated,
-				created
+				created,
+				device_id,
+				details_json
 			FROM
 				clients
 			WHERE id = %u;',
@@ -43,10 +45,28 @@ class ClientAction extends Action {
 
 		$bi = BrowserInfo::newFromContext( $context, $row->useragent );
 
+		$deviceRow = $db->getRow(str_queryf(
+			'SELECT id FROM devices WHERE id = %u ORDER BY id DESC LIMIT 1;',
+			$row->device_id
+		));
+		if ( !$deviceRow ) {
+			$device = false;
+		} else {
+			$deviceAction = DeviceAction::newFromContext( $this->getContext()->createDerivedRequestContext(
+				array(
+					'item' => $deviceRow->id
+				)
+			) );
+			$deviceAction->doAction();
+			$device = $deviceAction->getData();
+		}
+
 		$info = array(
 			'id' => intval( $row->id ),
 			'name' => $row->name,
 			'viewUrl' => swarmpath( "clients/{$row->name}" ),
+			'device' => $device,
+			'deviceDetails' => json_decode(gzdecode($row->details_json)),
 			'uaID' => $bi->getSwarmUaID(),
 			'uaRaw' => $bi->getRawUA(),
 			'uaData' => $bi->getUaData(),
@@ -54,6 +74,7 @@ class ClientAction extends Action {
 		);
 		self::addTimestampsTo( $info, $row->created, 'connected' );
 		self::addTimestampsTo( $info, $row->updated, 'pinged' );
+
 
 		// Run results
 		$results = array();

@@ -14,6 +14,8 @@ class RunPage extends Page {
 		$conf = $this->getContext()->getConf();
 		$request = $this->getContext()->getRequest();
 
+		$deviceKey = $request->getVal('device_key', '');
+
 		$this->setTitle( 'Test runner' );
 		$this->setClassName( 'run' );
 
@@ -29,6 +31,15 @@ class RunPage extends Page {
 		$this->bodyScripts[] = swarmpath( "js/run.js?" . time() );
 
 		$client = Client::newFromContext( $this->getContext(), $runToken );
+		$runName = $client->getClientRow()->name;
+
+		if( !empty($deviceKey))
+		{
+			$device = Device::newFromContext( $this->getContext() );
+			$client->linkToDevice($device);
+
+			$runName = $device->getDeviceRow()->name;
+		}
 
 		$html = '<script>'
 			. 'SWARM.client_id = ' . json_encode( $client->getClientRow()->id ) . ';'
@@ -41,7 +52,7 @@ class RunPage extends Page {
 					. $browserInfo->getIconHtml()
 				. '</div>'
 				. '<div class="span7">'
-					. '<h2>' . htmlspecialchars( $client->getClientRow()->name ) . '</h2>'
+					. '<h2>' . htmlspecialchars( $runName ) . '</h2>'
 					. '<p><strong>Status:</strong> <span id="msg"></span></p>'
 					. '<p><strong>Refresh:</strong> Press Enter / OK to refresh</p>'
 				. '</div>'
