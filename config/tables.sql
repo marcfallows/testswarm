@@ -270,6 +270,9 @@ CREATE TABLE `runresults` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Usage: DevicesAction.
+CREATE INDEX idx_runresults_client ON runresults (client_id);
+
 -- Usage: GetrunAction.
 CREATE INDEX idx_runresults_run_client ON runresults (run_id, client_id);
 
