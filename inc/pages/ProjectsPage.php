@@ -10,7 +10,11 @@
 class ProjectsPage extends Page {
 
 	public function execute() {
-		$action = ProjectsAction::newFromContext( $this->getContext() );
+		$action = ProjectsAction::newFromContext( $this->getContext()->createDerivedRequestContext(
+			array(
+				'jobs' => true
+			)
+		) );
 		$action->doAction();
 
 		$this->setAction( $action );
