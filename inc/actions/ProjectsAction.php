@@ -18,6 +18,7 @@ class ProjectsAction extends Action {
 		$db = $this->getContext()->getDB();
 		$request = $this->getContext()->getRequest();
 
+		$includeJobs = $request->getBool('jobs');
 		$sortField = $request->getVal( 'sort', 'title' );
 		$sortDir = $request->getVal( 'sort_dir', 'asc' );
 
@@ -66,28 +67,33 @@ class ProjectsAction extends Action {
 
 		if ( $projectRows ) {
 			foreach ( $projectRows as $projectRow ) {
-				// Get information about the latest job (if any)
-				$jobRow = $db->getRow(str_queryf(
-					'SELECT id FROM jobs WHERE project_id = %s ORDER BY id DESC LIMIT 1;',
-					$projectRow->id
-				));
-				if ( !$jobRow ) {
-					$job = false;
-				} else {
-					$jobAction = JobAction::newFromContext( $this->getContext()->createDerivedRequestContext(
-						array(
-							'item' => $jobRow->id
-						)
-					) );
-					$jobAction->doAction();
-					$job = $jobAction->getData();
-				}
 
 				$project = array(
 					'id' => $projectRow->id,
 					'displayTitle' => $projectRow->display_title,
-					'job' => $job
 				);
+
+				if ( $includeJobs ) {
+					$job = false;
+
+					// Get information about the latest job (if any)
+					$jobRow = $db->getRow(str_queryf(
+						'SELECT id FROM jobs WHERE project_id = %s ORDER BY id DESC LIMIT 1;',
+						$projectRow->id
+					));
+					if ( $jobRow ) {
+						$jobAction = JobAction::newFromContext( $this->getContext()->createDerivedRequestContext(
+							array(
+								'item' => $jobRow->id
+							)
+						) );
+						$jobAction->doAction();
+						$job = $jobAction->getData();
+					}
+
+					$project['job'] = $job;
+				}
+
 				self::addTimestampsTo( $project, $projectRow->created, 'created' );
 				$projects[] = $project;
 			}

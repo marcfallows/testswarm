@@ -262,7 +262,7 @@ HTML;
 
 		foreach ( $runs as $run ) {
 			$html .= '<tr><th class="swarm-label"><a href="' . htmlspecialchars( $run['info']['url'] ) . '" data-toggle="tooltip" title="' . htmlspecialchars( $run['info']['name'] ) . '">'
-				. $run['info']['name'] . '</a></th>';
+				. htmlspecialchars( $run['info']['name'] ) . '</a></th>';
 
 			// Looping over $userAgents instead of $run["uaRuns"],
 			// to avoid shifts in the table (github.com/jquery/testswarm/issues/13)

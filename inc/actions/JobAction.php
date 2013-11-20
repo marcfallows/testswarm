@@ -33,20 +33,8 @@ class JobAction extends Action {
 			return;
 		}
 
-		// Get runs for this job
-		$runRows = $db->getRows(str_queryf(
-			'SELECT
-				id,
-				url,
-				name
-			FROM
-				runs
-			WHERE job_id = %u
-			ORDER BY id;',
-			$this->item
-		));
+		$processed = self::getRunRows( $this->getContext(), array("jobID" => $this->item) );
 
-		$processed = self::getDataFromRunRows( $this->getContext(), $runRows );
 		$this->runs = $processed['runs'];
 		$this->userAgents = $processed['userAgents'];
 
@@ -131,110 +119,120 @@ class JobAction extends Action {
 	}
 
 	/**
-	 * Iterate over all run rows and aggregate the runs and user agents.
+	 * Get all run rows aggregated with the runs and user agents.
 	 * @return Array List of runs and userAgents.
 	 */
-	public static function getDataFromRunRows( TestSwarmContext $context, $runRows ) {
+	public static function getRunRows( TestSwarmContext $context, $options = array() ) {
 		$db = $context->getDB();
 		$userAgentIDs = array();
 		$runs = array();
 
+		$runClause = array();
+		if ( isset($options['jobID']) ) {
+			$runClause[] = 'runs.job_id = ' . $options['jobID'];
+		}
+		if ( isset($options['runID']) ) {
+			$runClause[] = 'runs.id = ' . $options['runID'];
+		}
+		if ( count( $runClause ) ) {
+			$runQuery = implode( ' AND ', $runClause );
+		} else {
+			$runQuery = '';
+		}
+
+		$runRows = $db->getRows(
+			"SELECT
+				runs.id as runId,
+				runs.job_id as runJobId,
+				runs.url as runUrl,
+				runs.name as runName,
+				run_useragent.status as runUaStatus,
+				run_useragent.useragent_id as runUaId,
+				runresults.id as runResultsId,
+				runresults.client_id,
+				runresults.status,
+				runresults.total,
+				runresults.fail,
+				runresults.error
+			FROM
+				runs,
+				run_useragent
+			LEFT JOIN
+				runresults
+				ON runresults.id = run_useragent.results_id
+			WHERE
+				$runQuery
+				AND run_useragent.run_id = runs.id
+			ORDER BY runs.id;"
+		);
+
 		foreach ( $runRows as $runRow ) {
-			$runInfo = array(
-				'id' => $runRow->id,
-				'name' => $runRow->name,
-				'url' => $runRow->url,
-			);
 
-			$runUaRuns = array();
+			$jobID = $runRow->runJobId;
 
-			// Get list of useragents that this run is scheduled for
-			$runUaRows = $db->getRows(str_queryf(
-				'SELECT
-					status,
-					useragent_id,
-					results_id
-				FROM
-					run_useragent
-				WHERE run_useragent.run_id = %u;',
-				$runRow->id
-			));
-			if ( $runUaRows ) {
-				foreach ( $runUaRows as $runUaRow ) {
+			if ( !isset($runs[$runRow->runId]) ){
+				$runInfo = array(
+					'id' => $runRow->runId,
+					'name' => $runRow->runName,
+					'url' => $runRow->runUrl,
+				);
 
-					// Add UA ID to the list. After we've collected
-					// all the UA IDs we'll perform one query for all of them
-					// to gather the info from the useragents table
-					$userAgentIDs[] = $runUaRow->useragent_id;
-
-
-					if ( !$runUaRow->results_id ) {
-						if($runUaRow->status == JobAction::$STATE_SUSPENDED) {
-							$runUaRuns[$runUaRow->useragent_id] = array(
-								'runStatus' => 'suspended',
-							);
-						} else {
-							$runUaRuns[$runUaRow->useragent_id] = array(
-								'runStatus' => 'new',
-							);
-						}
-					} else {
-						$runresultsRow = $db->getRow(str_queryf(
-							'SELECT
-								id,
-								client_id,
-								status,
-								total,
-								fail,
-								error
-							FROM runresults
-							WHERE id = %u;',
-							$runUaRow->results_id
-						));
-
-						if ( !$runresultsRow ) {
-							$this->setError( 'data-corrupt' );
-							return;
-						}
-
-						$runUaRuns[$runUaRow->useragent_id] = array(
-							'useragentID' => $runUaRow->useragent_id,
-							'clientID' => $runresultsRow->client_id,
-
-							'failedTests' => $runresultsRow->fail,
-							'totalTests' => $runresultsRow->total,
-							'errors' => $runresultsRow->error,
-
-							'runStatus' => self::getRunresultsStatus( $runresultsRow ),
-							// Add link to runresults
-							'runResultsID' => $runUaRow->results_id,
-							'runResultsUrl' => swarmpath( 'result/' . $runUaRow->results_id ),
-							'runResultsLabel' =>
-								$runresultsRow->status != ResultAction::$STATE_FINISHED
-								// If not finished, we don't have any numeric label to show
-								// (test could be in progress, or maybe it was aborted/lost)
-								? ''
-								: ( $runresultsRow->error > 0
-										// If there were errors, show number of errors
-										? $runresultsRow->error
-										: ( $runresultsRow->fail > 0
-											// If it failed, show number of failures
-											? $runresultsRow->fail
-											// If it passed, show total number of tests
-											: $runresultsRow->total
-										)
-									),
-						);
-					}
-				}
-
-				uksort( $runUaRuns, array( $context->getBrowserInfo(), 'sortUaId' ) );
-
-				$runs[] = array(
+				$runs[$runRow->runId] = array(
 					'info' => $runInfo,
-					'uaRuns' => $runUaRuns,
+					'uaRuns' => array()
 				);
 			}
+
+			$run = &$runs[$runRow->runId];
+			$runUaRuns = &$run['uaRuns'];
+
+			$userAgentIDs[] = $runRow->runUaId;
+
+			if ( !$runRow->runResultsId ) {
+				if($runRow->runUaStatus == JobAction::$STATE_SUSPENDED) {
+					$runUaRuns[$runRow->runUaId] = array(
+						'runStatus' => 'suspended',
+					);
+				} else {
+					$runUaRuns[$runRow->runUaId] = array(
+						'runStatus' => 'new',
+					);
+				}
+			} else {
+
+				$runUaRuns[$runRow->runUaId] = array(
+					'useragentID' => $runRow->runUaId,
+					'clientID' => $runRow->client_id,
+
+					'failedTests' => $runRow->fail,
+					'totalTests' => $runRow->total,
+					'errors' => $runRow->error,
+
+					'runStatus' => self::getRunresultsStatus( $runRow ),
+					// Add link to runresults
+					'runResultsID' => $runRow->runResultsId,
+					'runResultsUrl' => swarmpath( 'result/' . $runRow->runResultsId ),
+					'runResultsLabel' =>
+						$runRow->status != ResultAction::$STATE_FINISHED
+							// If not finished, we don't have any numeric label to show
+							// (test could be in progress, or maybe it was aborted/lost)
+							? ''
+							: ( $runRow->error > 0
+							// If there were errors, show number of errors
+							? $runRow->error
+							: ( $runRow->fail > 0
+								// If it failed, show number of failures
+								? $runRow->fail
+								// If it passed, show total number of tests
+								: $runRow->total
+							)
+						),
+				);
+			}
+		}
+
+		foreach ( $runs as &$run ) {
+			uksort( $run['uaRuns'], array( $context->getBrowserInfo(), 'sortUaId' ) );
 		}
 
 		// Get information for all encounted useragents
@@ -252,6 +250,7 @@ class JobAction extends Action {
 		uasort( $userAgents, 'BrowserInfo::sortUaData' );
 
 		return array(
+			'jobID' => $jobID,
 			'runs' => $runs,
 			'userAgents' => $userAgents,
 		);

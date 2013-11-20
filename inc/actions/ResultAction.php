@@ -65,24 +65,17 @@ class ResultAction extends Action {
 		// under a simple url.
 		// If the job is no longer in existance, properties
 		// 'otherRuns' and 'job' will be set to null.
-		$runRow = $db->getRow(str_queryf(
-			'SELECT
-				id,
-				url,
-				name,
-				job_id
-			FROM runs
-			WHERE id = %u;',
-			$row->run_id
-		));
 
-		if ( !$runRow ) {
+		$processed = JobAction::getRunRows( $context, array("runID" => $row->run_id) );
+
+		if ( empty($processed['runs']) ) {
 			$data['otherRuns'] = null;
 			$data['job'] = null;
 		} else {
-			$data['otherRuns'] = JobAction::getDataFromRunRows( $context, array( $runRow ) );
 
-			$jobID = intval( $runRow->job_id );
+			$data['otherRuns'] = $processed;
+
+			$jobID = intval( $processed['jobID'] );
 
 			$data['job'] = array(
 				'id' => $jobID,
