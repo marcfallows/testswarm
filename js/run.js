@@ -15,7 +15,7 @@
 	];
 
 	function msg( htmlMsg ) {
-		$( '#msg' ).html( htmlMsg );
+		$( '#msg' ).text( htmlMsg );
 	}
 
 	function log( htmlMsg ) {
@@ -191,6 +191,7 @@
 				total: 0,
 				status: 5, // ResultAction::STATE_HEARTBEAT
 				report_html: 'Test Timed Out From Heartbeat.',
+				job_id: runInfo.jobId,
 				run_id: currRunId,
 				client_id: SWARM.client_id,
 				run_token: SWARM.run_token,
@@ -270,6 +271,7 @@
 						$.param({
 							status: 2, // ResultAction::STATE_FINISHED
 							run_id: currRunId,
+							job_id: runInfo.jobId,
 							client_id: SWARM.client_id,
 							run_token: SWARM.run_token,
 							results_id: runInfo.resultsId,
