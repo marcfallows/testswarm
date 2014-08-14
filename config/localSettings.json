@@ -16,6 +16,10 @@
 			"browserFamily": "PlayStation",
 			"browserMajor": "3"
 		},
+		"PlayStation4": {
+			"browserFamily": "PlayStation",
+			"browserMajor": "4"
+		},
 		"IE11": {
 			"browserFamily": "IE",
 			"browserMajor": "11"
@@ -48,6 +52,10 @@
 		"Samsung2013": {
 			"browserFamily": "Samsung",
 			"browserMajor": "2013"
+		},
+		"Samsung2014": {
+			"browserFamily": "Samsung",
+			"browserMajor": "2014"
 		},
 		"LG2011": {
 			"browserFamily": "LG",
@@ -112,7 +120,7 @@
 			"PhantomJS1.9"
 		],
 		"Consoles": [
-			"PlayStation3"
+			"PlayStation4"
 		],
 		"Target TV Devices": [
 			"Samsung2012",
@@ -123,7 +131,8 @@
 		"Samsung TV Devices": [
 			"Samsung2011",
 			"Samsung2012",
-			"Samsung2013"
+			"Samsung2013",
+			"Samsung2014"
 		],
 		"LG TV Devices": [
 			"LG2011",
