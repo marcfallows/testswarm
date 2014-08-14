@@ -16,13 +16,21 @@
 			"browserFamily": "PlayStation",
 			"browserMajor": "3"
 		},
-		"Chrome31": {
-			"browserFamily": "Chrome",
-			"browserMajor": "31"
+		"IE11": {
+			"browserFamily": "IE",
+			"browserMajor": "11"
 		},
-		"Chrome30": {
+		"Chrome36": {
 			"browserFamily": "Chrome",
-			"browserMajor": "30"
+			"browserMajor": "36"
+		},
+		"Chrome37": {
+			"browserFamily": "Chrome",
+			"browserMajor": "37"
+		},
+		"Chrome38": {
+			"browserFamily": "Chrome",
+			"browserMajor": "38"
 		},
 		"PhantomJS1.9": {
 			"browserFamily": "PhantomJS",
@@ -94,11 +102,11 @@
 	},
 	"browserSets": {
 		"Default": [
-			"Chrome31",
+			"Chrome36",
 			"PhantomJS1.9"
 		],
 		"Chrome": [
-			"Chrome31"
+			"Chrome36"
 		],
 		"PhantomJS": [
 			"PhantomJS1.9"
