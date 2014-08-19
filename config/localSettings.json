@@ -36,6 +36,10 @@
 			"browserFamily": "Chrome",
 			"browserMajor": "38"
 		},
+		"Chrome39": {
+			"browserFamily": "Chrome",
+			"browserMajor": "39"
+		},
 		"PhantomJS1.9": {
 			"browserFamily": "PhantomJS",
 			"browserMajor": "1",
@@ -115,6 +119,14 @@
 		],
 		"Chrome": [
 			"Chrome36"
+		],
+		"Chrome Dev": [
+			"Chrome37",
+			"Chrome38",
+			"Chrome39"
+		],
+		"IE": [
+			"IE11"
 		],
 		"PhantomJS": [
 			"PhantomJS1.9"
